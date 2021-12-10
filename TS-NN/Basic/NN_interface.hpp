@@ -2,6 +2,7 @@
 #define NN_INTERFACE_HPP
 #include <iostream>
 #include <string>
+#include <map>
 
 namespace NNi
 {
@@ -20,11 +21,40 @@ namespace NNi
         std::string algorithm; // algorithm to be used for this run
         std::string metric;    // metric to be used for this run (only if algorithm = discrete or continuous)
         double delta;          // delta parameter for LSH of curves
+        // a map that will help us set the parameters from the command line
+        std::map<std::string, std::string> param_set = {
+            {"-i", "none"},
+            {"-q", "none"},
+            {"-k", "none"},
+            {"-L", "none"},
+            {"-M", "none"},
+            {"-probes", "none"},
+            {"-o", "none"},
+            {"-algorithm", "none"},
+            {"-metric", "none"},
+            {"-delta", "none"}};
+        std::map<std::string, std::string>::iterator it;
 
     public:
         NN_params(int argc, char *argv[])
         {
-            std::cout << "SUCCESS" << std::endl;
+            for (int i = 1; i < argc; i = i + 2)
+            {
+                this->it = this->param_set.find(argv[argc]); // try to find the parameter
+                if (this->it == this->param_set.end())       // if user entered a parameter that does not exist
+                {
+                    std::cout << "Parameter " << argv[argc] << " is not compatible. Please make sure you follow the format bellow: " << std::endl
+                              << "./bin/search -i <input file> -q <query file> -k <int> -L <int> -M <int> -probes "
+                              << "<int> -o <output file> -algorithm <LSH or Hypercube or Frechet> -metric <discrete "
+                              << "or continuous | only for -algorithm Frechet> -delta <double>" << std::endl;
+                    break; // stop reading
+                }
+                else // if found
+                {
+                    this->it->second = argv[argc + 1];
+                    std::cout << "Parameter " << argv[argc] << " set to " << argv[argc + 1];
+                }
+            }
         }
 
         void print_NN_params()
