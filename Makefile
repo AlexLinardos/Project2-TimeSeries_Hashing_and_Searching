@@ -9,3 +9,4 @@ LSH_main.o: ./TS-NN/Basic/LSH_main.cpp ./TS-NN/Basic/LSH.hpp ./TS-NN/Basic/NN_in
 
 clean:
 	rm bin/*
+	rm *.o

@@ -40,10 +40,10 @@ namespace NNi
         {
             for (int i = 1; i < argc; i = i + 2)
             {
-                this->it = this->param_set.find(argv[argc]); // try to find the parameter
-                if (this->it == this->param_set.end())       // if user entered a parameter that does not exist
+                this->it = this->param_set.find(argv[i]); // try to find the parameter
+                if (this->it == this->param_set.end())    // if user entered a parameter that does not exist
                 {
-                    std::cout << "Parameter " << argv[argc] << " is not compatible. Please make sure you follow the format bellow: " << std::endl
+                    std::cout << "Parameter " << argv[i] << " is not compatible. Please make sure you follow the format bellow: " << std::endl
                               << "./bin/search -i <input file> -q <query file> -k <int> -L <int> -M <int> -probes "
                               << "<int> -o <output file> -algorithm <LSH or Hypercube or Frechet> -metric <discrete "
                               << "or continuous | only for -algorithm Frechet> -delta <double>" << std::endl;
@@ -51,8 +51,8 @@ namespace NNi
                 }
                 else // if found
                 {
-                    this->it->second = argv[argc + 1];
-                    std::cout << "Parameter " << argv[argc] << " set to " << argv[argc + 1];
+                    this->it->second = argv[i + 1];
+                    std::cout << "Parameter " << argv[i] << " set to " << argv[i + 1];
                 }
             }
         }
