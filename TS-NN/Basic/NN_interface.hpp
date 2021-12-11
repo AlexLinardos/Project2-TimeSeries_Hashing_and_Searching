@@ -35,32 +35,42 @@ namespace NNi
             {"-delta", "none"}};
         std::map<std::string, std::string>::iterator it; // map iterator
 
-        /* Makes sure the value of a given parameter can be converted to int.
-            On a failure it resets the value to "none". */
+        /* Makes sure the value of a given parameter can be converted to int and sets it.
+            On a failure it sets the value to default. */
         void try_stoi(std::string param)
         {
             try
             {
                 int val = stoi(this->param_set.find(param)->second);
+                if (param == "-k")
+                	this->k = val;
+                else if (param == "-L")
+                       this->L = val;
+                else if (param == "-M")
+                       this->M = val;
+                else if (param == "-probes")
+                       this->probes = val;
             }
             catch (...)
             {
-                std::cout << "Given value " << this->param_set.find(param)->second << " of parameter " << param << " cannot be converted to integer." << std::endl;
+                std::cout << "[INPUT ERROR] Given value " << this->param_set.find(param)->second << " of parameter " << param << " cannot be converted to integer." << std::endl;
                 this->param_set.find(param)->second = "none";
             }
         }
 
-        /* Makes sure the value of a given parameter can be converted to double.
+        /* Makes sure the value of a given parameter can be converted to double and sets.
             On a failure it resets the value to "none". */
         void try_stod(std::string param)
         {
             try
             {
                 double val = stod(this->param_set.find(param)->second);
+                if (param == "-delta")
+                	this->delta = val;
             }
             catch (...)
             {
-                std::cout << "Given value " << this->param_set.find(param)->second << " of parameter " << param << " cannot be converted to double." << std::endl;
+                std::cout << "[INPUT ERROR] Given value " << this->param_set.find(param)->second << " of parameter " << param << " cannot be converted to double." << std::endl;
                 this->param_set.find(param)->second = "none";
             }
         }
@@ -70,19 +80,24 @@ namespace NNi
             Prints error message on failure. */
         void set_default(std::string param, std::string algo)
         {
-            if (param == "-k")
-                if (algo == "LSH")
+            if (param == "-k"){
+                if (algo == "LSH"){
                     this->k = 4;
-                else
+                    this->param_set.find(param)->second = "4";}
+                else{
                     this->k = 14;
-            else if (param == "-L")
+                    this->param_set.find(param)->second = "14";}}
+            else if (param == "-L"){
                 this->L = 5;
-            else if (param == "-M")
+                this->param_set.find(param)->second = "5";}
+            else if (param == "-M"){
                 this->M = 10;
-            else if (param == "-probes")
+                this->param_set.find(param)->second = "10";}
+            else if (param == "-probes"){
                 this->probes = 2;
-            else
-                std::cout << "Parameter " << param << " has no default value." << std::endl;
+                this->param_set.find(param)->second = "2";}
+            else{
+                std::cout << "Parameter " << param << " has no default value." << std::endl;}
         }
 
         /* Sets parameter and confirms that all of them have taken values.
@@ -94,7 +109,7 @@ namespace NNi
             std::string algo = this->param_set.find("-algorithm")->second;
             if ((algo != "LSH") && (algo != "Hypercube") && (algo != "Frechet"))
             {
-                std::cout << "Algorithm " << algo << " is not recognisable." << std::endl;
+                std::cout << "[INPUT ERROR] Algorithm " << algo << " is not recognisable." << std::endl;
                 return -1;
             }
             else
@@ -105,8 +120,12 @@ namespace NNi
                     std::string met = this->param_set.find("-metric")->second;
                     if ((met != "discrete") && (met != "continuous"))
                     {
-                        std::cout << "Metric " << met << " is not recognisable." << std::endl;
+                        std::cout << "[INPUT ERROR] Metric " << met << " is not recognisable." << std::endl;
                         return -1;
+                    }
+                    else
+                    {
+                    	this->metric = met;
                     }
                 }
             }
@@ -127,7 +146,7 @@ namespace NNi
                     }
                     else
                     {
-                        std::cout << "Could not find value for mandatory parameter " << curr_key << "." << std::endl;
+                        std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
                         return -1;
                     }
                 }
@@ -151,6 +170,29 @@ namespace NNi
                     else if (curr_key == "-o")
                         this->output_f = this->param_set.find("-o")->second;
                 }
+                it++;
+            }
+            
+            // final check for potential stoi fails (we should set to default)
+            this->it = this->param_set.begin();
+            while (it != this->param_set.end())
+            {
+            	curr_key = it->first;
+                // if a parameter has no value see if it can be set to a default
+                if (it->second == "none")
+                {
+                    if ((curr_key == "-k") || (curr_key == "-L") || (curr_key == "-M") || (curr_key == "-probes"))
+                    {
+                        this->set_default(curr_key, algo);
+                        std::cout << "Parameter " << curr_key << " has been set to default value." << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
+                        return -1;
+                    }
+                }
+            	it++;
             }
             return 0;
         }
@@ -174,7 +216,7 @@ namespace NNi
                 this->metric = "none";
                 this->delta = 0.0;
             }
-            else // normal run
+            else if (argc%2 == 1) // normal run
             {
                 // pass user's parameter values into the map
                 for (int i = 1; i < argc; i = i + 2)
@@ -182,10 +224,8 @@ namespace NNi
                     this->it = this->param_set.find(std::string(argv[i])); // try to find the parameter
                     if (this->it == this->param_set.end())                 // if user entered a parameter that does not exist
                     {
-                        std::cout << "Parameter " << argv[i] << " is not compatible. Please make sure you follow the format bellow: " << std::endl
-                                  << "./bin/search -i <input file> -q <query file> -k <int> -L <int> -M <int> -probes "
-                                  << "<int> -o <output file> -algorithm <LSH or Hypercube or Frechet> -metric <discrete "
-                                  << "or continuous | only for -algorithm Frechet> -delta <double>" << std::endl;
+                        std::cout << "[INPUT ERROR] Parameter " << argv[i] << " is not compatible."<< std::endl;
+                        this->success = false;
                         break; // stop reading
                     }
                     else // if found pass the corresponding value to the map
@@ -199,12 +239,18 @@ namespace NNi
                 if (result == -1)
                     this->success = false;
             }
+            else
+            {
+            	std::cout<<"[INPUT ERROR] Missing command line parameter."<<std::endl;
+            	this->success = false;
+            }
         }
 
         // Prints all parameters with their current values
         void print_NN_params()
         {
-            std::cout << "[Current parameters for Neareset Neighbor search]" << std::endl
+            std::cout<<"-------------------------------------------"<<std::endl
+            << "[Current parameters for Neareset Neighbor search]" << std::endl
                       << "Input file: " << this->input_f << std::endl
                       << "Query file: " << this->query_f << std::endl
                       << "Output file: " << this->output_f << std::endl
@@ -214,7 +260,8 @@ namespace NNi
                       << "L: " << this->L << std::endl
                       << "M: " << this->M << std::endl
                       << "probes: " << this->probes << std::endl
-                      << "delta: " << this->delta << std::endl;
+                      << "delta: " << this->delta << std::endl
+                      <<"-------------------------------------------"<<std::endl;
         }
     };
 }
