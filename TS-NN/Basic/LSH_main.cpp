@@ -23,14 +23,15 @@ int main(int argc, char *argv[])
     lsh_params.k = params.k;
     lsh_params.L = params.L;
     lsh_params.out_file = params.output_f;
-    /*std::cout << lsh_params.input_file << std::endl
-              << lsh_params.query_file << std::endl
-              << lsh_params.k << std::endl
-              << lsh_params.L << std::endl
-              << lsh_params.out_file << std::endl;*/
+    // std::cout << lsh_params.input_file << std::endl
+    //           << lsh_params.query_file << std::endl
+    //           << lsh_params.k << std::endl
+    //           << lsh_params.L << std::endl
+    //           << lsh_params.out_file << std::endl;
 
     vector<Item> dataset;
     read_items(dataset, params.input_f);
+    // std::cout << dataset[99].id;
     // for (int i = 0; i < dataset[0].xij.size(); i++)
     //     std::cout << dataset[0].xij[i] << " ";
 }
