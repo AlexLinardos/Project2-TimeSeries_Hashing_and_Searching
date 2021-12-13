@@ -28,4 +28,9 @@ int main(int argc, char *argv[])
               << lsh_params.k << std::endl
               << lsh_params.L << std::endl
               << lsh_params.out_file << std::endl;*/
+
+    vector<Item> dataset;
+    read_items(dataset, params.input_f);
+    // for (int i = 0; i < dataset[0].xij.size(); i++)
+    //     std::cout << dataset[0].xij[i] << " ";
 }

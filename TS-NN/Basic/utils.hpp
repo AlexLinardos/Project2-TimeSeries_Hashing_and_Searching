@@ -87,7 +87,7 @@ void read_items(vector<Item> &data, const string &filename)
             {
                 try
                 {
-                    int xij_int = stod(out[i]);
+                    double xij_int = stod(out[i]);
                     item.xij.push_back(xij_int);
                 }
                 catch (...)
