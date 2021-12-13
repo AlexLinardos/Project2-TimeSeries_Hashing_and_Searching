@@ -43,13 +43,13 @@ namespace NNi
             {
                 int val = stoi(this->param_set.find(param)->second);
                 if (param == "-k")
-                	this->k = val;
+                    this->k = val;
                 else if (param == "-L")
-                       this->L = val;
+                    this->L = val;
                 else if (param == "-M")
-                       this->M = val;
+                    this->M = val;
                 else if (param == "-probes")
-                       this->probes = val;
+                    this->probes = val;
             }
             catch (...)
             {
@@ -66,7 +66,7 @@ namespace NNi
             {
                 double val = stod(this->param_set.find(param)->second);
                 if (param == "-delta")
-                	this->delta = val;
+                    this->delta = val;
             }
             catch (...)
             {
@@ -80,24 +80,38 @@ namespace NNi
             Prints error message on failure. */
         void set_default(std::string param, std::string algo)
         {
-            if (param == "-k"){
-                if (algo == "LSH"){
+            if (param == "-k")
+            {
+                if (algo == "LSH")
+                {
                     this->k = 4;
-                    this->param_set.find(param)->second = "4";}
-                else{
+                    this->param_set.find(param)->second = "4";
+                }
+                else
+                {
                     this->k = 14;
-                    this->param_set.find(param)->second = "14";}}
-            else if (param == "-L"){
+                    this->param_set.find(param)->second = "14";
+                }
+            }
+            else if (param == "-L")
+            {
                 this->L = 5;
-                this->param_set.find(param)->second = "5";}
-            else if (param == "-M"){
+                this->param_set.find(param)->second = "5";
+            }
+            else if (param == "-M")
+            {
                 this->M = 10;
-                this->param_set.find(param)->second = "10";}
-            else if (param == "-probes"){
+                this->param_set.find(param)->second = "10";
+            }
+            else if (param == "-probes")
+            {
                 this->probes = 2;
-                this->param_set.find(param)->second = "2";}
-            else{
-                std::cout << "Parameter " << param << " has no default value." << std::endl;}
+                this->param_set.find(param)->second = "2";
+            }
+            else
+            {
+                std::cout << "Parameter " << param << " has no default value." << std::endl;
+            }
         }
 
         /* Sets parameter and confirms that all of them have taken values.
@@ -125,7 +139,7 @@ namespace NNi
                     }
                     else
                     {
-                    	this->metric = met;
+                        this->metric = met;
                     }
                 }
             }
@@ -172,12 +186,12 @@ namespace NNi
                 }
                 it++;
             }
-            
+
             // final check for potential stoi fails (we should set to default)
             this->it = this->param_set.begin();
             while (it != this->param_set.end())
             {
-            	curr_key = it->first;
+                curr_key = it->first;
                 // if a parameter has no value see if it can be set to a default
                 if (it->second == "none")
                 {
@@ -192,7 +206,7 @@ namespace NNi
                         return -1;
                     }
                 }
-            	it++;
+                it++;
             }
             return 0;
         }
@@ -205,8 +219,8 @@ namespace NNi
         {
             if (argc == 1) // only for testing purposes
             {
-                this->input_f = "nasdaq2015_2017.csv";
-                this->query_f = "nasdaq2017_LQ.csv";
+                this->input_f = "nasd_input.csv";
+                this->query_f = "nasd_query.csv";
                 this->k = 4;
                 this->L = 5;
                 this->M = 0;
@@ -216,7 +230,7 @@ namespace NNi
                 this->metric = "none";
                 this->delta = 0.0;
             }
-            else if (argc%2 == 1) // normal run
+            else if (argc % 2 == 1) // normal run
             {
                 // pass user's parameter values into the map
                 for (int i = 1; i < argc; i = i + 2)
@@ -224,7 +238,7 @@ namespace NNi
                     this->it = this->param_set.find(std::string(argv[i])); // try to find the parameter
                     if (this->it == this->param_set.end())                 // if user entered a parameter that does not exist
                     {
-                        std::cout << "[INPUT ERROR] Parameter " << argv[i] << " is not compatible."<< std::endl;
+                        std::cout << "[INPUT ERROR] Parameter " << argv[i] << " is not compatible." << std::endl;
                         this->success = false;
                         break; // stop reading
                     }
@@ -241,16 +255,16 @@ namespace NNi
             }
             else
             {
-            	std::cout<<"[INPUT ERROR] Missing command line parameter."<<std::endl;
-            	this->success = false;
+                std::cout << "[INPUT ERROR] Missing command line parameter." << std::endl;
+                this->success = false;
             }
         }
 
         // Prints all parameters with their current values
         void print_NN_params()
         {
-            std::cout<<"-------------------------------------------"<<std::endl
-            << "[Current parameters for Neareset Neighbor search]" << std::endl
+            std::cout << "-------------------------------------------" << std::endl
+                      << "[Current parameters for Nearest Neighbor search]" << std::endl
                       << "Input file: " << this->input_f << std::endl
                       << "Query file: " << this->query_f << std::endl
                       << "Output file: " << this->output_f << std::endl
@@ -261,7 +275,7 @@ namespace NNi
                       << "M: " << this->M << std::endl
                       << "probes: " << this->probes << std::endl
                       << "delta: " << this->delta << std::endl
-                      <<"-------------------------------------------"<<std::endl;
+                      << "-------------------------------------------" << std::endl;
         }
     };
 }
