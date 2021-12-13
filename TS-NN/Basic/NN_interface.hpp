@@ -11,16 +11,6 @@ namespace NNi
     class NN_params
     {
     private:
-        std::string input_f;   // input file
-        std::string query_f;   // query file
-        int k;                 // number of hi hash functions for LSH or d' dimensions for HC
-        int L;                 // number of hash tables for LSH
-        int M;                 // max number of vectors to be checked for HC
-        int probes;            // max number of probes to be checked for HC
-        std::string output_f;  // ouput file
-        std::string algorithm; // algorithm to be used for this run
-        std::string metric;    // metric to be used for this run (only for -algorithm Frechet)
-        double delta;          // delta parameter for LSH of curves
         // a map that will help us set the parameters from the command line
         std::map<std::string, std::string> param_set = {
             {"-i", "none"},
@@ -212,7 +202,17 @@ namespace NNi
         }
 
     public:
-        bool success = true; // to check if construction of object was 100% successful
+        std::string input_f;   // input file
+        std::string query_f;   // query file
+        int k;                 // number of hi hash functions for LSH or d' dimensions for HC
+        int L;                 // number of hash tables for LSH
+        int M;                 // max number of vectors to be checked for HC
+        int probes;            // max number of probes to be checked for HC
+        std::string output_f;  // ouput file
+        std::string algorithm; // algorithm to be used for this run
+        std::string metric;    // metric to be used for this run (only for -algorithm Frechet)
+        double delta;          // delta parameter for LSH of curves
+        bool success = true;   // to check if construction of object was 100% successful
 
         // Constructor
         NN_params(int argc, char *argv[])
