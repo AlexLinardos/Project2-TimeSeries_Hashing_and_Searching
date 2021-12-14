@@ -225,7 +225,7 @@ std::vector<std::pair<double, Item *>> brute_force_search(vector<Item> &dataset,
 // Computes L2 norm between 2 points (x1,y1), (x2, y2)
 double L2(double x1, double y1, double x2, double y2)
 {
-    double dist = pow((x1 - x2), 2.0) - pow((y1 - y2), 2.0);
+    double dist = pow((x1 - x2), 2) + pow((y1 - y2), 2);
     return sqrt(dist);
 }
 
