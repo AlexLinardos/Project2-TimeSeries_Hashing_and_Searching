@@ -21,10 +21,10 @@ int main(int argc, char *argv[])
     params.print_NN_params();
 
     // read the datasets as vector of Items (Item is described in utils.hpp)
-    vector<Item>* dataset = new vector<Item>;
-    read_items(dataset, params.input_f);
-    vector<Item>* queries = new vector<Item>;
-    read_items(queries, params.query_f);
+    vector<Item> dataset;
+    read_items(&dataset, params.input_f);
+    vector<Item> queries;
+    read_items(&queries, params.query_f);
 
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
