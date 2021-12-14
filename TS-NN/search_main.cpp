@@ -1,7 +1,9 @@
 #include <iostream>
 #include "NN_interface.hpp"
-#include "LSH.hpp"
-#include "HC.hpp"
+#include "./Basic/LSH.hpp"
+#include "./Basic/HC.hpp"
+#include "./ContinuousFrechet/con_Frechet.hpp"
+#include "./DiscreteFrechet/disc_Frechet.hpp"
 
 // ./bin/search -i <input file> -q <query file> -k 1 -L 2 -M 3 -probes 4 -o <output file> -algorithm <LSH> -metric <discrete> -delta 5.01
 int main(int argc, char *argv[])

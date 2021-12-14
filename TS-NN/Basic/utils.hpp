@@ -222,35 +222,4 @@ std::vector<std::pair<double, Item *>> brute_force_search(vector<Item> &dataset,
     return knns;
 }
 
-bool CompareMaps(unordered_map<string, pair<Item *, int>> &a, unordered_map<string, pair<Item *, int>> &b)
-{
-    if (a.size() != b.size())
-        return false; // differing sizes, they are not the same
-
-    /* traverse the unordered map, */
-    for (auto x : a)
-    {
-        string str = x.first;
-        if (a[str].second != b[str].second)
-            return false;
-    }
-
-    return true;
-}
-
-bool ItemVectorsEqual(vector<Item> &a, vector<Item> &b)
-{
-    if (a.size() != b.size())
-        return false; // differing sizes, they are not the same
-
-    /* traverse the unordered map, */
-    for (int i = 0; i < a.size(); i++)
-    {
-        if (a[i].xij != b[i].xij)
-            return false;
-    }
-
-    return true;
-}
-
 #endif

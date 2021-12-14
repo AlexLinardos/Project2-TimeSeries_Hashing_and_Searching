@@ -219,8 +219,8 @@ namespace NNi
         {
             if (argc == 1) // only for testing purposes
             {
-                this->input_f = "../../datasets/nasd_input.csv";
-                this->query_f = "../../datasets/nasd_query.csv";
+                this->input_f = "../datasets/nasd_input.csv";
+                this->query_f = "../datasets/nasd_query.csv";
                 this->k = 4;
                 this->L = 5;
                 this->M = 0;
