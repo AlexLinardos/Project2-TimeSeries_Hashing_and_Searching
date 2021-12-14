@@ -114,7 +114,7 @@ void read_items(vector<Item> *data, const string &filename)
     return;
 }
 
-// computes the Euclidean Distance between 2 points of dimension d
+// computes the Euclidean Distance between 2 Items of dimension d
 double EuclideanDistance(const Item *p, const Item *q, const uint16_t &d)
 {
     double sum = 0;
@@ -220,6 +220,13 @@ std::vector<std::pair<double, Item *>> brute_force_search(vector<Item> &dataset,
         }
     }
     return knns;
+}
+
+// Computes L2 norm between 2 points (x1,y1), (x2, y2)
+double L2(double x1, double y1, double x2, double y2)
+{
+    double dist = pow((x1 - x2), 2.0) - pow((y1 - y2), 2.0);
+    return sqrt(dist);
 }
 
 #endif
