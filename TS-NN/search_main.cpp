@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         lsh_params.out_file = params.output_f;
 
         std::cout << "------[LSH]------" << std::endl;
-        LSH *lsh = new LSH(lsh_params, dataset, 3, 8);
+        LSH *lsh = new LSH(lsh_params, *dataset, 3, 8);
 
         std::cout << "Searching for " << lsh_params.N << " nearest neighbors..." << std::endl;
 
@@ -59,14 +59,14 @@ int main(int argc, char *argv[])
         clock_t begin;
         clock_t end;
 
-        for (int i = 0; i < queries.size(); i++)
+        for (int i = 0; i < (*queries).size(); i++)
         {
-            output_file << "Query: " << queries[i].id << endl;
+            output_file << "Query: " << (*queries)[i].id << endl;
 
             // cout << "[k-ANN]" << endl;
             lsh_begin = std::chrono::steady_clock::now();
             begin = clock();
-            knns = lsh->kNN(&queries[i], dataset.size() / 5);
+            knns = lsh->kNN(&(*queries)[i], dataset->size() / 5);
             end = clock();
             lsh_end = std::chrono::steady_clock::now();
             lsh_elapsed += double(end - begin);
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
             // cout << "[Brute Force]" << endl;
             true_begin = std::chrono::steady_clock::now();
             begin = clock();
-            true_knns = brute_force_search(dataset, &queries[i], lsh_params.N);
+            true_knns = brute_force_search((*dataset), &((*queries)[i]), lsh_params.N);
             end = clock();
             true_end = std::chrono::steady_clock::now();
             brute_elapsed += double(end - begin);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
             output_file << "tTrue: " << (std::chrono::duration_cast<std::chrono::microseconds>(true_end - true_begin).count()) / 1000000.0 << std::endl;
 
             output_file << "R-near neighbors:" << endl;
-            r = lsh->RangeSearch(&queries[i], lsh_params.R, dataset.size() / 5);
+            r = lsh->RangeSearch(&((*queries)[i]), lsh_params.R, dataset->size() / 5);
             for (int a = 0; a < r.size(); a++)
             {
                 output_file << r[a].second->id << ", " << r[a].first << endl;
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
         brute_elapsed = brute_elapsed / CLOCKS_PER_SEC;
         cout << "tlSH/tTrue: " << (lsh_elapsed * 1000000.0) / (brute_elapsed * 1000000.0) << endl;
 
-        avg_error = avg_error / (double)queries.size(); // calculate avg distLSH/distTrue across all Queries
+        avg_error = avg_error / (double)queries->size(); // calculate avg distLSH/distTrue across all Queries
 
         cout << "distLSH/distTrue (avg): " << avg_error << endl;
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
         std::cout << "------[Hypercube]------" << std::endl;
 
         F f = F(params.k);
-        Hypercube *cube = new Hypercube(cube_params, dataset, 3, f.h_maps);
+        Hypercube *cube = new Hypercube(cube_params, *dataset, 3, f.h_maps);
 
         std::cout << "Searching for " << cube_params.N << " nearest neighbors..." << std::endl;
 
@@ -163,14 +163,14 @@ int main(int argc, char *argv[])
         clock_t begin;
         clock_t end;
 
-        for (int i = 0; i < queries.size(); i++)
+        for (int i = 0; i < queries->size(); i++)
         {
-            output_file << "Query: " << queries[i].id << endl;
+            output_file << "Query: " << (*queries)[i].id << endl;
 
             // cout << "[k-ANN]" << endl;
             lsh_begin = std::chrono::steady_clock::now();
             begin = clock();
-            knns = cube->kNN(&queries[i]);
+            knns = cube->kNN(&(*queries)[i]);
             end = clock();
             lsh_end = std::chrono::steady_clock::now();
             lsh_elapsed += double(end - begin);
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
             // cout << "[Brute Force]" << endl;
             true_begin = std::chrono::steady_clock::now();
             begin = clock();
-            true_knns = brute_force_search(dataset, &queries[i], cube_params.N);
+            true_knns = brute_force_search(*dataset, &(*queries)[i], cube_params.N);
             end = clock();
             true_end = std::chrono::steady_clock::now();
             brute_elapsed += double(end - begin);
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
             output_file << "tTrue: " << (std::chrono::duration_cast<std::chrono::microseconds>(true_end - true_begin).count()) / 1000000.0 << std::endl;
 
             output_file << "R-near neighbors:" << endl;
-            r = cube->RangeSearch(&queries[i], cube_params.R);
+            r = cube->RangeSearch(&(*queries)[i], cube_params.R);
             for (int a = 0; a < r.size(); a++)
             {
                 output_file << r[a].second->id << ", " << r[a].first << endl;
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
         brute_elapsed = brute_elapsed / CLOCKS_PER_SEC;
         cout << "tCUBE/tTrue: " << (lsh_elapsed * 1000000.0) / (brute_elapsed * 1000000.0) << endl;
 
-        avg_error = avg_error / (double)queries.size(); // calculate avg distLSH/distTrue across all Queries
+        avg_error = avg_error / (double)queries->size(); // calculate avg distLSH/distTrue across all Queries
 
         cout << "distCUBE/distTrue (avg): " << avg_error << endl;
 
@@ -244,5 +244,8 @@ int main(int argc, char *argv[])
         std::cout << "RESULT:" << dF::discrete_frechet(item1, item2);
     }
 
+
+    delete dataset;
+    delete queries;
     return 0;
 }
