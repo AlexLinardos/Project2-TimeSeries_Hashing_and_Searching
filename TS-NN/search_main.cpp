@@ -234,6 +234,15 @@ int main(int argc, char *argv[])
     if (params.algorithm == "Frechet")
     {
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
+        Item item1;
+        Item item2;
+        for (int i = 0; i < 3; i++)
+        {
+            item1.xij.push_back(i);
+            item2.xij.push_back(i);
+        }
+        std::cout << "RESULT:" << dF::discrete_frechet(item1, item2);
     }
+
     return 0;
 }
