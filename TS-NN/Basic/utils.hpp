@@ -54,7 +54,7 @@ vector<string> tokenize(const string &str)
 }
 
 // used to read our dataset/query files
-void read_items(vector<Item> &data, const string &filename)
+void read_items(vector<Item> *data, const string &filename)
 {
     string line;
     ifstream f;
@@ -97,7 +97,7 @@ void read_items(vector<Item> &data, const string &filename)
                     catch_count++;
                 }
             }
-            data.push_back(item);
+            data->push_back(item);
             count += 1;
         }
 
