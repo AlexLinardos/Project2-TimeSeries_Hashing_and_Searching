@@ -26,8 +26,8 @@ namespace cF
         return curve;
     }
 
-    double distance(Item &item1,  Item &item2)
+    double distance(Item &item1, Item &item2)
     {
-        return Frechet::Continuous::distance(vecToCurve(item1) , vecToCurve(item2)).value;
+        return Frechet::Continuous::distance(vecToCurve(item1), vecToCurve(item2)).value;
     }
 }

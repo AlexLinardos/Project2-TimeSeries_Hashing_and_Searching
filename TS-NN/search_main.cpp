@@ -3,7 +3,7 @@
 #include "curves.hpp"
 #include "./Basic/LSH.hpp"
 #include "./Basic/HC.hpp"
-#include "./ContinuousFrechet/con_Frechet.hpp"
+//#include "./ContinuousFrechet/con_Frechet.hpp"
 #include "./DiscreteFrechet/disc_Frechet.hpp"
 #include "./DiscreteFrechet/discF_LSH.hpp"
 
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
         // perform LSH for discrete Frechet
         dFLSH::LSH dLSH = dFLSH::LSH(curves_dataset, params.L, 2.0, 8);
 
-        std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]);
+        // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]);
     }
 
     delete dataset;
