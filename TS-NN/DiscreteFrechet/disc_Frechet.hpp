@@ -5,9 +5,10 @@
 
 namespace dF
 {
-    // recursive computation of table values for discrete Frechet distance
+    // recursive computation of table values for discrete Frechet distance (dynamic programming)
     double compute_c(vector<vector<double>> &c, int i, int j, const Item &p, const Item &q)
     {
+        // if this value has already been computed return it immediately
         if (c[i][j] > -1)
         {
             return c[i][j];
@@ -43,7 +44,7 @@ namespace dF
         }
         else
         {
-            // initialize 2d table for dynamic programming with value -1
+            // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
             vector<vector<double>> c(pl);
             for (int i = 0; i < pl; i++)
             {
