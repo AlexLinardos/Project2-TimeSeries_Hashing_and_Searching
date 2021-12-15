@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     read_items(dataset, params.input_f);
     vector<Item> *queries = new vector<Item>;
     read_items(queries, params.query_f);
+    vector<curves::Curve2d> * curves_dataset = new vector<curves::Curve2d>;
 
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
@@ -244,18 +245,20 @@ int main(int argc, char *argv[])
         }
 
         // create a dataset of curves using our original dataset and the time vector
-        vector<curves::Curve2d> curves_dataset;
+        
         for (int i = 0; i < (*dataset).size(); i++)
         {
-            curves_dataset.push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
+            curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
         }
 
         // perform LSH for discrete Frechet
-        dFLSH::LSH dLSH = dFLSH::LSH(curves_dataset, params.L, 2.0, 8);
+        dFLSH::LSH dLSH = dFLSH::LSH(*curves_dataset, params.L, 2.0, 8);
 
-        std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]);
+        std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
+        std::cout << "RESULT: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
     }
 
+    delete curves_dataset;
     delete dataset;
     delete queries;
     return 0;
