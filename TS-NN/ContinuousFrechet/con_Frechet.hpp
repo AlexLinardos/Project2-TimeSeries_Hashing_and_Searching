@@ -47,7 +47,7 @@ namespace cF
 
     double distance(Item &item1,  Item &item2)
     {
-        return Frechet::Continuous::distance(vecToCurve(item1) , vecToCurve(item2)).value;
+        return Frechet::Continuous::distance(vecToCurve(item1), vecToCurve(item2)).value;
     }
     
     double c_distance(curves::Curve2d &item1,  curves::Curve2d &item2)
@@ -55,18 +55,18 @@ namespace cF
         return Frechet::Continuous::distance(vecToCurve(item1) , vecToCurve(item2)).value;
     }
     
-    curves::Curve2d * filter_curve(curves::Curve2d &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
-    {
-        curves::Curve2d * filtered_curve = new curves::Curve2d(curve.id);
-        filtered_curve->data
-        int i=0;
-        while(1)
-        {
+    // curves::Curve2d * filter_curve(curves::Curve2d &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
+    // {
+    //     curves::Curve2d * filtered_curve = new curves::Curve2d(curve.id);
+    //     filtered_curve->data
+    //     int i=0;
+    //     while(1)
+    //     {
 
-            i++;
-        }
-        return 
-    }
+    //         i++;
+    //     }
+    //     return 
+    // }
 
 
 }

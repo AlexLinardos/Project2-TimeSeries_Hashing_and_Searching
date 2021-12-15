@@ -11,6 +11,18 @@
 
 namespace dFLSH
 {
+    class Association
+    {
+    public:
+        curves::Curve2d *curve;
+        vector<curves::Point2d> *grid_curve;
+        vector<double> *x;
+
+        Association(curves::Curve2d *curve, vector<curves::Point2d> *grid_curve, vector<double> *x) : curve(curve),
+                                                                                                      grid_curve(grid_curve),
+                                                                                                      x(x) {}
+    };
+
     class LSH
     {
     private:
@@ -19,8 +31,10 @@ namespace dFLSH
         vector<curves::Curve2d> dataset;
         int L;
         double delta;
-        vector<curves::Curve2d *> **hashTables;
+        vector<vector<Association>> hashTables;
         int tableSize;
+        vector<vector<curves::Point2d>> h_curves;
+        vector<vector<double>> x_vecs;
 
     public:
         LSH(vector<curves::Curve2d> &dataset, int L, double delta, int tableSize_divisor) : dataset(dataset),
@@ -28,7 +42,8 @@ namespace dFLSH
                                                                                             delta(delta),
                                                                                             tableSize(dataset.size() / tableSize_divisor),
                                                                                             eng(time(0) + clock()),
-                                                                                            urd(0.0, delta){};
+                                                                                            urd(0.0, delta),
+                                                                                            hashTables(L){};
 
         vector<curves::Point2d> produce_h(curves::Curve2d curve)
         {
@@ -57,17 +72,6 @@ namespace dFLSH
                 }
             }
 
-            // // apply padding if there were duplicates
-            // double padding = 10000;
-            // if (starting_size > clean_pis.size())
-            // {
-            //     cout << "I PADDED " << (starting_size - clean_pis.size()) << std::endl;
-            //     for (int i = clean_pis.size(); i < starting_size; i++)
-            //     {
-            //         clean_pis.push_back(curves::Point2d(padding, padding));
-            //     }
-            // }
-
             return clean_pis;
         }
 
@@ -82,8 +86,32 @@ namespace dFLSH
             return result;
         }
 
+        int classic_hashing(vector<double> &x)
+        {
+        }
+
         void perform_hashing()
         {
+            double padding = 10000;
+
+            for (int i = 0; i < this->L; i++)
+            {
+                for (int j = 0; j < this->dataset.size(); j++)
+                {
+                    int starting_size = this->dataset[j].data.size();
+                    this->h_curves.push_back(this->produce_h(this->dataset[j]));
+                    int new_size = this->h_curves.back().size();
+                    if (starting_size > new_size)
+                    {
+                        for (int z = new_size; z < starting_size; z++)
+                        {
+                            this->h_curves.back().push_back(curves::Point2d(padding, padding));
+                        }
+                    }
+                    this->x_vecs.push_back(this->concat_points(this->h_curves.back()));
+                    Association ass = Association(&this->dataset[j], &this->h_curves.back(), &this->x_vecs.back());
+                }
+            }
         }
     };
 }

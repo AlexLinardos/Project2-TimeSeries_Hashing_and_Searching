@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <cmath>
 
 namespace curves
 {
@@ -14,12 +15,6 @@ namespace curves
 
         Point2d(double x, double y) : x(x), y(y){};
     };
-
-    double point2d_L2(curve::Point2d point1, curve::Point2d point2)
-    {
-        double dist = pow((point1.x - point2.x), 2) + pow((point1.y - point2.y), 2);
-        return sqrt(dist);
-    }
 
     class Curve2d
     {
@@ -47,6 +42,12 @@ namespace curves
             }
         }
     };
+}
+
+double point2d_L2(curves::Point2d &point1, curves::Point2d &point2)
+{
+    double dist = pow((point1.x - point2.x), 2) + pow((point1.y - point2.y), 2);
+    return sqrt(dist);
 }
 
 #endif
