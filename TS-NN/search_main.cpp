@@ -236,14 +236,23 @@ int main(int argc, char *argv[])
     if (params.algorithm == "Frechet")
     {
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
+        // create a vector that will help us represent time
         vector<double> t_dimension;
         for (int i = 0; i < (*dataset)[0].xij.size(); i++)
         {
             t_dimension.push_back(i);
         }
-        curves::Curve2d curve1 = curves::Curve2d((*dataset)[0].id, t_dimension, (*dataset)[0].xij);
-        curves::Curve2d curve2 = curves::Curve2d((*dataset)[1].id, t_dimension, (*dataset)[1].xij);
-        std::cout << "RESULT: " << dF::discrete_frechet(curve1, curve2) << endl;
+
+        // create a dataset of curves using our original dataset and the time vector
+        vector<curves::Curve2d> curves_dataset;
+        for (int i = 0; i < (*dataset).size(); i++)
+        {
+            curves_dataset.push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
+        }
+
+        // perform LSH for discrete Frechet
+        dFLSH::LSH dLSH = dFLSH::LSH(curves_dataset, params.L, 2.0, 8);
+
         std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]);
     }
 
