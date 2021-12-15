@@ -1,9 +1,11 @@
 #include <iostream>
 #include "NN_interface.hpp"
+#include "curves.hpp"
 #include "./Basic/LSH.hpp"
 #include "./Basic/HC.hpp"
 #include "./ContinuousFrechet/con_Frechet.hpp"
 #include "./DiscreteFrechet/disc_Frechet.hpp"
+#include "./DiscreteFrechet/discF_LSH.hpp"
 
 // ./bin/search -i <input file> -q <query file> -k 1 -L 2 -M 3 -probes 4 -o <output file> -algorithm <LSH> -metric <discrete> -delta 5.01
 int main(int argc, char *argv[])
@@ -21,9 +23,9 @@ int main(int argc, char *argv[])
     params.print_NN_params();
 
     // read the datasets as vector of Items (Item is described in utils.hpp)
-    vector<Item>* dataset = new vector<Item>;
+    vector<Item> *dataset = new vector<Item>;
     read_items(dataset, params.input_f);
-    vector<Item>* queries = new vector<Item>;
+    vector<Item> *queries = new vector<Item>;
     read_items(queries, params.query_f);
 
     if (params.algorithm == "LSH")
@@ -234,9 +236,15 @@ int main(int argc, char *argv[])
     if (params.algorithm == "Frechet")
     {
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
-        std::cout << "RESULT: " << dF::discrete_frechet((*dataset)[0], (*dataset)[1]);
+        vector<double> t_dimension;
+        for (int i = 0; i < (*dataset)[0].xij.size(); i++)
+        {
+            t_dimension.push_back(i);
+        }
+        curves::Curve2d curve1 = curves::Curve2d((*dataset)[0].id, t_dimension, (*dataset)[0].xij);
+        curves::Curve2d curve2 = curves::Curve2d((*dataset)[1].id, t_dimension, (*dataset)[1].xij);
+        std::cout << "RESULT: " << dF::discrete_frechet(curve1, curve2);
     }
-
 
     delete dataset;
     delete queries;
