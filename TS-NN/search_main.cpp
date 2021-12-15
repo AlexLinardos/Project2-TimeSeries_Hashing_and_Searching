@@ -243,7 +243,8 @@ int main(int argc, char *argv[])
         }
         curves::Curve2d curve1 = curves::Curve2d((*dataset)[0].id, t_dimension, (*dataset)[0].xij);
         curves::Curve2d curve2 = curves::Curve2d((*dataset)[1].id, t_dimension, (*dataset)[1].xij);
-        std::cout << "RESULT: " << dF::discrete_frechet(curve1, curve2);
+        std::cout << "RESULT: " << dF::discrete_frechet(curve1, curve2) << endl;
+        std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]);
     }
 
     delete dataset;
