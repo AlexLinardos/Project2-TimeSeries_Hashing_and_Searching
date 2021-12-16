@@ -253,8 +253,8 @@ int main(int argc, char *argv[])
         }
 
         // perform LSH for discrete Frechet
-        dFLSH::LSH dLSH = dFLSH::LSH(*curves_dataset, params.L, 2.0, 8);
-        std::cout << "Hash tables: " << sizeof(dLSH.hashTables) / sizeof(dLSH.hashTables[0]) << std::endl;
+        dFLSH::LSH dLSH = dFLSH::LSH(curves_dataset, params.L, 2.0, 3, 8);
+        // std::cout << "Hash tables: " << sizeof(dLSH.hashTables) / sizeof(dLSH.hashTables[0]) << std::endl;
         // dLSH.dataset_hashing();
         // for (int i = 0; i < dLSH.hashTables.size(); i++)
         // {

@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include "../utils.hpp"
+#include "../curves.hpp"
 
 #include "./Fred/frechet.hpp"
 
