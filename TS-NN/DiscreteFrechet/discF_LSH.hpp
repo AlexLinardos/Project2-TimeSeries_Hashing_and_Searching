@@ -188,12 +188,12 @@ namespace dFLSH
             }
         }
 
-        // searches for the nearest neighbour of the query
-        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d query, int threshold = 0)
+        // searches for the approximate nearest neighbour of the query curve
+        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, int threshold = 0)
         {
             int starting_size = query.data.size();
 
-            // will store current nearest neighbour in curr_NN along with its distance from query
+            // we will store current nearest neighbour in curr_NN along with its distance from query
             vector<double> dummy_vec;
             for (int i = 0; i < starting_size; i++)
                 dummy_vec.push_back(0.0);

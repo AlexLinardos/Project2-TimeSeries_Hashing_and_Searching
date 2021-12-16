@@ -261,7 +261,9 @@ int main(int argc, char *argv[])
         // perform LSH for discrete Frechet
         dFLSH::LSH *dLSH = new dFLSH::LSH(curves_dataset, params.L, 2.0, 3, 8);
         std::pair<curves::Curve2d *, double> test = dLSH->search_ANN((*curves_queryset)[0]);
-        std::cout << "Found NN with id " << test.first->id << " at frechet distance " << test.second << endl;
+        std::cout << "Found aNN with id " << test.first->id << " at frechet distance " << test.second << endl;
+        std::pair<curves::Curve2d *, double> test2 = dF::search_exactNN((*curves_queryset)[0], *curves_dataset);
+        std::cout << "Exact NN has id " << test2.first->id << " and is at frechet distance " << test2.second << endl;
         delete dLSH;
 
         int size1 = (*curves_dataset)[0].data.size();
