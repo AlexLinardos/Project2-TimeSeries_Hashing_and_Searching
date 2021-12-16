@@ -30,36 +30,34 @@ namespace dFLSH
     private:
         std::default_random_engine eng;
         std::uniform_real_distribution<double> urd;
-        vector<curves::Curve2d> * dataset;
+        vector<curves::Curve2d> *dataset;
         int L; // number of hash tables
         double delta;
         int tableSize;
-        int datasize;  
-        int windowSize;                     // size of each table
-        vector<vector<curves::Point2d>> h_curves; // stores grid-curves 
+        int datasize;
+        int windowSize;                           // size of each table
+        vector<vector<curves::Point2d>> h_curves; // stores grid-curves
         vector<vector<double>> x_vecs;            // stores real vectors x
-
-        std::vector<Association *> **hashTables; // Association* hashTables;
-        G **g; // Gs for oldLSH for Storing, could also have only 1 G probably
-        double ** shifted_deltas;
+        std::vector<Association> **hashTables;    // Association* hashTables;
+        double **shifted_deltas;                  // stores shifts for all grids
 
     public:
         LSH(vector<curves::Curve2d> *dataset, int L, double delta, int factor_for_windowSize, int divisor_for_tableSize) : dataset(dataset),
-                                                                                            L(L),
-                                                                                            delta(delta),
-                                                                                            tableSize(dataset->size() / divisor_for_tableSize),
-                                                                                            eng(time(0) + clock()),
-                                                                                            urd(0.0, delta)
+                                                                                                                           L(L),
+                                                                                                                           delta(delta),
+                                                                                                                           tableSize(dataset->size() / divisor_for_tableSize),
+                                                                                                                           eng(time(0) + clock()),
+                                                                                                                           urd(0.0, delta)
         {
             // tune windowSize
-            std::random_device rd;                                         // only used once to initialise (seed) engine
-            std::mt19937 rng(rd());                                        // random-number engine used (Mersenne-Twister in this case)
+            std::random_device rd;                                          // only used once to initialise (seed) engine
+            std::mt19937 rng(rd());                                         // random-number engine used (Mersenne-Twister in this case)
             std::uniform_int_distribution<int> uni(0, dataset->size() - 1); // guaranteed unbiased
             int item_index_1;
             int item_index_2;
             double distance = 0;
             /* For dataset->size()/4 samples we randomly choose two points of the dataset and calculate their Euclidean distance.
-                We sum these disances and calculate the average. Then we multiply that average distance by a factor of our choice and we 
+                We sum these disances and calculate the average. Then we multiply that average distance by a factor of our choice and we
                 get the windowsize. That factor can be adjusted at LSH.cpp at the initialization of the LSH instance */
             for (int i = 0; i < dataset->size() / 4; i++)
             {
@@ -70,29 +68,37 @@ namespace dFLSH
                 distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
             }
             windowSize = factor_for_windowSize * (int)distance;
-            cout << "windowSize " << windowSize << endl;
+            std::cout << "windowSize :" << windowSize << std::endl;
 
-            // Initialize L hashTables, Grids(shifted_deltas) and g_hashFunctions ***************************
-            hashTables = new std::vector<Association *> *[L];
+            // Initialize L hashTables, Grids(shifted_deltas)
+            hashTables = new std::vector<Association> *[L];
             shifted_deltas = new double *[L];
             for (int i = 0; i < L; i++) // for every hashTable
             {
-                hashTables[i] = new std::vector<Association *>[tableSize];
-                // shifted_deltas[i] = 
-                // g[i] = new G(params.k, tableSize, windowSize, dimension); ******************** G for oldLSH
-                // cout << g[i]->produce_g(dataset[0]) << " ";
+                hashTables[i] = new std::vector<Association>[tableSize];
+                // shifted_deltas[i] =
             }
 
-            // Hash all items in training set and insert them into their buckets ****************************
-            for (int a = 0; a < dataset->size(); a++)
-            {
-                for (int i = 0; i < L; i++)
-                {
-                    // unsigned int bucket = g[i]->produce_g(/*curve[a]*/) % (long unsigned)tableSize;
-                    // hashTables[i][bucket].push_back(/*association*/);
-                }
-            }
+            // Hash all items in dataset and insert them into their buckets
+            this->dataset_hashing();
+            // for (int i = 0; i < this->L; i++)
+            // {
+            //     std::cout << "TABLE " << i << std::endl;
+            //     for (int j = 0; j < this->tableSize; j++)
+            //     {
+            //         std::cout << "BUCKET " << j << " has " << this->hashTables[i][j].size() << std::endl;
+            //     }
+            // }
         };
+
+        ~LSH()
+        {
+            for (int i = 0; i < this->L; i++)
+            {
+                delete[] hashTables[i];
+            }
+            delete[] hashTables;
+        }
 
         // maps curve P to a grid
         vector<curves::Point2d> produce_h(curves::Curve2d curve)
@@ -125,15 +131,6 @@ namespace dFLSH
             return clean_pis;
         }
 
-        ~LSH()
-        {
-            for (int i = 0; i < this->L; i++)
-            {
-                delete[] hashTables[i];
-            }
-            delete[] hashTables;
-        }
-
         // concatenates points of grid-curve to produce a (real) vector x
         vector<double> concat_points(vector<curves::Point2d> points)
         {
@@ -152,7 +149,7 @@ namespace dFLSH
             double padding = 10000;
 
             // will be used for storing in 1d table
-            G g_family = G(4, this->tableSize, 600); // w=600
+            G g_family = G(4, this->tableSize, this->windowSize); // or w=600
 
             // repeat L times (where is L is the number of tables)
             for (int i = 0; i < this->L; i++)
@@ -175,13 +172,14 @@ namespace dFLSH
                     // produce vector x
                     this->x_vecs.push_back(this->concat_points(this->h_curves.back()));
                     // create Association between curve, grid-curve and vector
-                    Association * ass = new Association((*dataset)[j], &this->h_curves.back(), &this->x_vecs.back());
+                    Association ass = Association(&(*dataset)[j], &this->h_curves.back(), &this->x_vecs.back());
                     // create Item object so we can use produce_g from previous project
                     Item item_for_g = Item((*dataset)[j].id, this->x_vecs.back());
                     // get item hash value
                     unsigned int hval = g_family.produce_g(item_for_g);
+                    unsigned int pos = hval % (long unsigned)this->tableSize;
                     // store it in table
-                    this->hashTables[L][hval].push_back(ass);
+                    this->hashTables[i][pos].push_back(ass);
                 }
             }
         }
