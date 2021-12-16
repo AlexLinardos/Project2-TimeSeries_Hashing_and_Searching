@@ -3,7 +3,7 @@
 #include "curves.hpp"
 #include "./Basic/LSH.hpp"
 #include "./Basic/HC.hpp"
-//#include "./ContinuousFrechet/con_Frechet.hpp"
+#include "./ContinuousFrechet/con_Frechet.hpp"
 #include "./DiscreteFrechet/disc_Frechet.hpp"
 #include "./DiscreteFrechet/discF_LSH.hpp"
 
@@ -266,12 +266,12 @@ int main(int argc, char *argv[])
         }
         delete[] arr;
 
-        // // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
-        // std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
+        // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
+        std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
 
-        // filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
+        filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
 
-        // std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
+        std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
     }
 
     delete filtered_curves_dataset;

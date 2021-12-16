@@ -27,7 +27,7 @@ namespace cF
     //     return curve;
     // }
 
-    Curve vecToCurve(curves::Curve2d &curve)
+    Curve fredCurve(curves::Curve2d &curve)
     {
         Points points(1);
         for (int i = 0; i < curve.data.size(); i++)
@@ -54,8 +54,45 @@ namespace cF
     
     double c_distance(curves::Curve2d &item1,  curves::Curve2d &item2)
     {
-        return Frechet::Continuous::distance(vecToCurve(item1) , vecToCurve(item2)).value;
+        return Frechet::Continuous::distance(fredCurve(item1) , fredCurve(item2)).value;
     }
+
+    // minima maxima y removing from π˜ = v1, . . . , v` any vi s.t. vi ∈ [min{vi−1, vi+1}, max{vi−1, vi+1}] 
+    // στο min/max αφαιρεις ενα στοιχειο αν ειναι μεγαλυτερο απο το προηγουμενο του και μικροτερο απο το επομενο του ή αν ειναι ισο με ενα απο τα 2
+    void minima_maxima(vector<double> &p)
+    {
+        int og_size = p.size();
+        int i=0;
+        int cuts=0;
+        int total_cuts=0;
+        while(i+2 < p.size())
+        {
+            cuts=0;
+            if ((p[i+1] >= min(p[i], p[i+2])) || (p[i+1] >= max(p[i], p[i+2])))
+            {
+                p.erase(p.begin()+i+1); // erase element i+1
+                cuts++;
+                total_cuts++;
+            }
+            if(cuts==0)
+                i++;
+        }
+        while(cuts!=0)
+        {
+            cuts=0;
+            i--;
+            if ((p[i+1] >= min(p[i], p[i+2])) || (p[i+1] >= max(p[i], p[i+2])))
+            {
+                p.erase(p.begin()+i+1); // erase element i+1
+                cuts++;
+                total_cuts++;
+            }
+        }
+
+        cout << "minima_maxima cut " << total_cuts << " points out of "<< og_size << endl;
+        return;
+    }
+
     
     curves::Curve2d * filter_curve(curves::Curve2d &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
     {
@@ -102,6 +139,11 @@ namespace cF
         }
         return filtered_curve_dataset;
     }
+
+    // Item * to1dcurves(vector<curves::Curve2d> &curve_dataset)
+    // {
+    //     Item * curves = new Iteam 
+    // }
 
 
 }
