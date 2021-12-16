@@ -5,3 +5,4 @@ TS-NN/Basic/LSH_main.exe
 *.exe
 TS-NN/Basic/output.txt
 TS-NN/output.txt
+*.json

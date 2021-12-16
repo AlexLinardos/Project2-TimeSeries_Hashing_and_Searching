@@ -9,7 +9,7 @@
 namespace dF
 {
     // recursive computation of table values for discrete Frechet distance (dynamic programming)
-    double compute_c(vector<vector<double>> &c, int i, int j, const curves::Curve2d &p, const curves::Curve2d &q)
+    double compute_c(double **c, int i, int j, const curves::Curve2d &p, const curves::Curve2d &q)
     {
         // if this value has already been computed return it immediately
         if (c[i][j] > -1)
@@ -36,22 +36,26 @@ namespace dF
         return c[i][j];
     }
 
-    double discrete_frechet(const curves::Curve2d &p, const curves::Curve2d &q)
+    // calculates discrete Frechet distance between two curves (returns table of dynamic programming approach)
+    double **discrete_frechet(const curves::Curve2d &p, const curves::Curve2d &q)
     {
         int pl = p.data.size();
         int ql = q.data.size();
+        double **c = new double *[pl];
+        for (int i = 0; i < pl; i++)
+        {
+            c[i] = new double[ql];
+        }
         if (pl != ql)
         {
             std::cout << "Cannot compute discrete Frechet distance for curves with different dimensions." << std::endl;
-            return -1;
+            return c;
         }
         else
         {
             // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
-            vector<vector<double>> c(pl);
             for (int i = 0; i < pl; i++)
             {
-                c[i] = vector<double>(ql);
                 for (int j = 0; j < ql; j++)
                 {
                     c[i][j] = -1;
@@ -59,8 +63,9 @@ namespace dF
             }
             // base case
             c[0][0] = L2(p.data[0].x, p.data[0].y, q.data[0].x, q.data[0].y);
-            // begin computing
-            return compute_c(c, pl - 1, ql - 1, p, q);
+            // compute
+            compute_c(c, pl - 1, ql - 1, p, q);
+            return c;
         }
     }
 

@@ -3,7 +3,7 @@
 #include "curves.hpp"
 #include "./Basic/LSH.hpp"
 #include "./Basic/HC.hpp"
-#include "./ContinuousFrechet/con_Frechet.hpp"
+//#include "./ContinuousFrechet/con_Frechet.hpp"
 #include "./DiscreteFrechet/disc_Frechet.hpp"
 #include "./DiscreteFrechet/discF_LSH.hpp"
 
@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
     read_items(dataset, params.input_f);
     vector<Item> *queries = new vector<Item>;
     read_items(queries, params.query_f);
-    vector<curves::Curve2d> * curves_dataset = new vector<curves::Curve2d>;
-    vector<curves::Curve2d> * filtered_curves_dataset = new vector<curves::Curve2d>;
+    vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
+    vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
 
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
         }
 
         // create a dataset of curves using our original dataset and the time vector
-        
+
         for (int i = 0; i < (*dataset).size(); i++)
         {
             curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
@@ -254,13 +254,29 @@ int main(int argc, char *argv[])
 
         // perform LSH for discrete Frechet
         dFLSH::LSH dLSH = dFLSH::LSH(*curves_dataset, params.L, 2.0, 8);
+        std::cout << "Hash tables: " << sizeof(dLSH.hashTables) / sizeof(dLSH.hashTables[0]) << std::endl;
+        // dLSH.dataset_hashing();
+        // for (int i = 0; i < dLSH.hashTables.size(); i++)
+        // {
+        //     std::cout << "TABLE " << i << " has " << dLSH.hashTables[i].size() << "buckets." << std::endl;
+        // }
 
-        // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
-        std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
+        int size1 = (*curves_dataset)[0].data.size();
+        int size2 = (*curves_dataset)[1].data.size();
+        double **arr = dF::discrete_frechet((*curves_dataset)[0], (*curves_dataset)[1]);
+        std::cout << "HERE: " << arr[size1 - 1][size2 - 1] << std::endl;
+        for (int i = 0; i < size1; i++)
+        {
+            delete[] arr[i];
+        }
+        delete[] arr;
 
-        filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
+        // // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
+        // std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
 
-        std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
+        // filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
+
+        // std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
     }
 
     delete filtered_curves_dataset;
