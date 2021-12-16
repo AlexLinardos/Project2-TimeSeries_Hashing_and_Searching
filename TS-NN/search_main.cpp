@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     read_items(queries, params.query_f);
     vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
     vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
+    vector<curves::Curve2d> *curves_queryset = new vector<curves::Curve2d>;
 
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
@@ -246,20 +247,29 @@ int main(int argc, char *argv[])
         }
 
         // create a dataset of curves using our original dataset and the time vector
-
         for (int i = 0; i < (*dataset).size(); i++)
         {
             curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
         }
 
+        // do the same for query set
+        for (int i = 0; i < (*queries).size(); i++)
+        {
+            curves_queryset->push_back(curves::Curve2d((*queries)[i].id, t_dimension, (*queries)[i].xij));
+        }
+
         // perform LSH for discrete Frechet
         dFLSH::LSH *dLSH = new dFLSH::LSH(curves_dataset, params.L, 2.0, 3, 8);
+        std::pair<curves::Curve2d *, double> test = dLSH->search_ANN((*curves_queryset)[0]);
+        std::cout << "Found aNN with id " << test.first->id << " at frechet distance " << test.second << endl;
+        std::pair<curves::Curve2d *, double> test2 = dF::search_exactNN((*curves_queryset)[0], *curves_dataset);
+        std::cout << "Exact NN has id " << test2.first->id << " and is at frechet distance " << test2.second << endl;
         delete dLSH;
 
         int size1 = (*curves_dataset)[0].data.size();
         int size2 = (*curves_dataset)[1].data.size();
-        double **arr = dF::discrete_frechet((*curves_dataset)[0], (*curves_dataset)[1]);
-        std::cout << "HERE: " << arr[size1 - 1][size2 - 1] << std::endl;
+        double **arr = dF::discrete_frechet((*curves_dataset)[0], (*curves_queryset)[0]);
+        std::cout << "Test Frechet: " << arr[size1 - 1][size2 - 1] << std::endl;
         for (int i = 0; i < size1; i++)
         {
             delete[] arr[i];

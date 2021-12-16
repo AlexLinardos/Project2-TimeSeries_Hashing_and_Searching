@@ -6,6 +6,7 @@
 #include <time.h>
 #include <math.h>
 #include <set>
+#include <limits>
 #include "disc_Frechet.hpp"
 #include "../curves.hpp"
 #include "../Basic/LSH.hpp"
@@ -39,12 +40,15 @@ namespace dFLSH
         vector<vector<curves::Point2d>> h_curves; // stores grid-curves
         vector<vector<double>> x_vecs;            // stores real vectors x
         std::vector<Association> **hashTables;    // Association* hashTables;
-        double **shifted_deltas;                  // stores shifts for all grids
+        vector<std::pair<double, double>> shifts; // stores shifts for all grids so we can snap queries on those grids
+        double padding = 10000;                   // value that will replace duplicates
+        G *g_family;                              // G hash family that is gonna be used for storing in 1d table
 
     public:
         LSH(vector<curves::Curve2d> *dataset, int L, double delta, int factor_for_windowSize, int divisor_for_tableSize) : dataset(dataset),
                                                                                                                            L(L),
                                                                                                                            delta(delta),
+                                                                                                                           shifts(L),
                                                                                                                            tableSize(dataset->size() / divisor_for_tableSize),
                                                                                                                            eng(time(0) + clock()),
                                                                                                                            urd(0.0, delta)
@@ -67,18 +71,17 @@ namespace dFLSH
                     item_index_2 = uni(rng);
                 distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
             }
-            windowSize = factor_for_windowSize * (int)distance;
-            std::cout << "windowSize :" << windowSize << std::endl;
+            this->windowSize = factor_for_windowSize * (int)distance;
+            std::cout << "windowSize :" << this->windowSize << std::endl;
 
+            this->g_family = new G(4, this->tableSize, this->windowSize, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
             // Initialize L hashTables, Grids(shifted_deltas)
             hashTables = new std::vector<Association> *[L];
-            shifted_deltas = new double *[L];
             for (int i = 0; i < L; i++) // for every hashTable
             {
                 hashTables[i] = new std::vector<Association>[tableSize];
                 // shifted_deltas[i] =
             }
-
             // Hash all items in dataset and insert them into their buckets
             this->dataset_hashing();
             // for (int i = 0; i < this->L; i++)
@@ -93,6 +96,7 @@ namespace dFLSH
 
         ~LSH()
         {
+            delete this->g_family;
             for (int i = 0; i < this->L; i++)
             {
                 delete[] hashTables[i];
@@ -101,13 +105,10 @@ namespace dFLSH
         }
 
         // maps curve P to a grid
-        vector<curves::Point2d> produce_h(curves::Curve2d curve)
+        vector<curves::Point2d> produce_h(curves::Curve2d curve, double tx, double ty)
         {
             int starting_size = curve.data.size();
             vector<curves::Point2d> snap_pis; // pi'
-            // produce 2 shift values (one for each dimension)
-            double tx = urd(eng);
-            double ty = urd(eng);
 
             // follow <<xi' = floor((x-t)/δ + 1/2)*δ + t>> formula to perform snapping
             for (int i = 0; i < starting_size; i++)
@@ -146,27 +147,29 @@ namespace dFLSH
         // performs hashing to assing Association items to buckets
         void dataset_hashing()
         {
-            double padding = 10000;
-
-            // will be used for storing in 1d table
-            G g_family = G(4, this->tableSize, this->windowSize); // or w=600
-
             // repeat L times (where is L is the number of tables)
             for (int i = 0; i < this->L; i++)
             {
+                // produce 2 shift values (one for each dimension)
+                double tx = urd(eng);
+                double ty = urd(eng);
+                // save them
+                this->shifts[i] = std::make_pair(tx, ty);
+
                 // for each curve
                 for (int j = 0; j < this->dataset->size(); j++)
                 {
                     int starting_size = (*dataset)[j].data.size();
+
                     // snap it to grid
-                    this->h_curves.push_back(this->produce_h((*dataset)[j]));
+                    this->h_curves.push_back(this->produce_h((*dataset)[j], tx, ty));
                     int new_size = this->h_curves.back().size();
                     // apply padding if needed
                     if (starting_size > new_size)
                     {
                         for (int z = new_size; z < starting_size; z++)
                         {
-                            this->h_curves.back().push_back(curves::Point2d(padding, padding));
+                            this->h_curves.back().push_back(curves::Point2d(this->padding, this->padding));
                         }
                     }
                     // produce vector x
@@ -174,14 +177,80 @@ namespace dFLSH
                     // create Association between curve, grid-curve and vector
                     Association ass = Association(&(*dataset)[j], &this->h_curves.back(), &this->x_vecs.back());
                     // create Item object so we can use produce_g from previous project
-                    Item item_for_g = Item((*dataset)[j].id, this->x_vecs.back());
+                    Item *item_for_g = new Item((*dataset)[j].id, this->x_vecs.back());
                     // get item hash value
-                    unsigned int hval = g_family.produce_g(item_for_g);
+                    unsigned int hval = (*this->g_family).produce_g(*item_for_g);
                     unsigned int pos = hval % (long unsigned)this->tableSize;
-                    // store it in table
+                    delete item_for_g; // we don't need it anymore
+                    // store association in table
                     this->hashTables[i][pos].push_back(ass);
                 }
             }
+        }
+
+        // searches for the approximate nearest neighbour of the query curve
+        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, int threshold = 0)
+        {
+            int starting_size = query.data.size();
+
+            // we will store current nearest neighbour in curr_NN along with its distance from query
+            vector<double> dummy_vec;
+            for (int i = 0; i < starting_size; i++)
+                dummy_vec.push_back(0.0);
+            curves::Curve2d null_curve = curves::Curve2d("null", dummy_vec, dummy_vec);
+            std::pair<curves::Curve2d *, double> curr_NN;
+            curr_NN.first = &null_curve;
+            curr_NN.second = std::numeric_limits<double>::max();
+
+            int searched = 0; // will be used to check if we reached threshold of checks
+            // for each hash table
+            for (int i = 0; i < this->L; i++)
+            {
+                // snap it to grid
+                vector<curves::Point2d> grid_curve = this->produce_h(query, this->shifts[i].first, this->shifts[i].second);
+                int new_size = grid_curve.size();
+                // apply padding if needed
+                if (starting_size > new_size)
+                {
+                    for (int z = new_size; z < starting_size; z++)
+                    {
+                        grid_curve.push_back(curves::Point2d(this->padding, this->padding));
+                    }
+                }
+                // produce vector x
+                vector<double> x_vec = this->concat_points(grid_curve);
+
+                // create Item object so we can use produce_g from previous project
+                Item *item_for_g = new Item(query.id, x_vec);
+
+                // find the bucket
+                long unsigned id = this->g_family->produce_g(*item_for_g);
+                long unsigned bucket = id % (long unsigned)this->tableSize;
+
+                delete item_for_g; // we don't need it anymore
+
+                // for each item in the bucket
+                for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
+                {
+                    // check if we bumped into same curve as current nearest before doing calculations
+                    if (this->hashTables[i][bucket][j].curve->id != curr_NN.first->id)
+                    {
+                        double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query)[this->hashTables[i][bucket][j].curve->data.size() - 1][query.data.size() - 1];
+                        // if nearer curve is found
+                        if (dfd < curr_NN.second)
+                        {
+                            // replace curr_NN
+                            curr_NN.first = this->hashTables[i][bucket][j].curve;
+                            curr_NN.second = dfd;
+                        }
+                        searched++;
+                        if (threshold != 0 && searched >= threshold)
+                            return curr_NN;
+                    }
+                }
+            }
+            std::cout << "SEARCHED: " << searched << endl;
+            return curr_NN;
         }
     };
 }

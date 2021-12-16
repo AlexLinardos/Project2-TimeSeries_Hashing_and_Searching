@@ -48,7 +48,7 @@ namespace dF
         }
         if (pl != ql)
         {
-            std::cout << "Cannot compute discrete Frechet distance for curves with different dimensions." << std::endl;
+            std::cout << "ERROR: Cannot compute discrete Frechet distance for curves with different dimensions." << std::endl;
             return c;
         }
         else
@@ -67,6 +67,36 @@ namespace dF
             compute_c(c, pl - 1, ql - 1, p, q);
             return c;
         }
+    }
+
+    // searches for the exact nearest neighbour of the query curve using brute force approach
+    std::pair<curves::Curve2d *, double> search_exactNN(curves::Curve2d &query, vector<curves::Curve2d> &dataset)
+    {
+        int size = query.data.size(); // length of curve
+
+        // we will store current nearest neighbour in curr_NN along with its distance from query
+        vector<double> dummy_vec;
+        for (int i = 0; i < size; i++)
+            dummy_vec.push_back(0.0);
+        curves::Curve2d null_curve = curves::Curve2d("null", dummy_vec, dummy_vec);
+        std::pair<curves::Curve2d *, double> curr_NN;
+        curr_NN.first = &null_curve;
+        curr_NN.second = std::numeric_limits<double>::max();
+
+        // for each curve in the dataset
+        for (int i = 0; i < dataset.size(); i++)
+        {
+            // calculate discrete Frechet distance to it from given query
+            double dfd = dF::discrete_frechet(query, dataset[i])[size - 1][size - 1];
+            // if nearer curve is found
+            if (dfd < curr_NN.second)
+            {
+                // replace curr_NN
+                curr_NN.first = &(dataset[i]);
+                curr_NN.second = dfd;
+            }
+        }
+        return curr_NN;
     }
 
 }

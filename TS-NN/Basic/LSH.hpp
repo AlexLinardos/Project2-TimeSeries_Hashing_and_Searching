@@ -32,7 +32,7 @@ class G
     vector<int> r;
 
 public:
-    G(int k, int tableSize, int window) : k(k), tableSize(tableSize), w(window), eng(time(0) + clock()), uid(0, w - 1)
+    G(int k, int tableSize, int window, int dimensions) : k(k), tableSize(tableSize), w(window), d(dimensions), eng(time(0) + clock()), uid(0, w - 1)
     {
         m = (long unsigned int)(((long long)1 << 32) - (long long)5);
         // create a vector v whose points follow the uniform real distribution
@@ -72,7 +72,6 @@ public:
             // Add the above into the sum
             sum += resmodm;
         }
-
         sum = sum % m;
 
         // sum = sum % (long unsigned)tableSize;
@@ -128,7 +127,7 @@ public:
         for (int i = 0; i < params.L; i++) // for every hashTable
         {
             hashTables[i] = new std::vector<Item *>[tableSize];
-            g[i] = new G(params.k, tableSize, windowSize);
+            g[i] = new G(params.k, tableSize, windowSize, dimension);
             // cout << g[i]->produce_g(dataset[0]) << " ";
         }
         // cout << endl;

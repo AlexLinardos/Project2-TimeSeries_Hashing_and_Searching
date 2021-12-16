@@ -26,7 +26,6 @@ public:
     int produce_h(Item p)
     {
         vector<float> v;
-
         // create a vector v whose points follow the normal distribution
         for (int i = 0; i < d; i++)
         {
@@ -34,7 +33,6 @@ public:
         }
 
         float t = urd(eng);
-
         return floor(((inner_product(p.xij.begin(), p.xij.end(), v.begin(), 0)) + t) / this->w);
     }
 
