@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     vector<Item> *queries = new vector<Item>;
     read_items(queries, params.query_f);
     vector<curves::Curve2d> * curves_dataset = new vector<curves::Curve2d>;
+    vector<curves::Curve2d> * filtered_curves_dataset = new vector<curves::Curve2d>;
 
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
@@ -254,10 +255,15 @@ int main(int argc, char *argv[])
         // perform LSH for discrete Frechet
         dFLSH::LSH dLSH = dFLSH::LSH(*curves_dataset, params.L, 2.0, 8);
 
-        std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
-        std::cout << "RESULT: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
+        // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
+        std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
+
+        filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
+
+        std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
     }
 
+    delete filtered_curves_dataset;
     delete curves_dataset;
     delete dataset;
     delete queries;
