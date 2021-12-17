@@ -88,6 +88,40 @@ namespace cF
         return filtered_curve;
     }
 
+    void filter_curve(vector<curves::Point2d> &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
+    {
+        int og_size = curve.size();
+        int i=0;
+        int cuts=0;
+        int total_cuts=0;
+        while(i+2 < curve.size())
+        {
+            cuts=0;
+            if((point2d_L2(curve[i], curve[i+1]) <= e) && (point2d_L2(curve[i+1], curve[i+2]) <= e))
+            {
+                curve.erase(curve.begin()+i+1); // erase element i+1
+                cuts++;
+                total_cuts++;
+            }
+            if(cuts==0)
+                i++;
+        }
+        while(cuts!=0)
+        {
+            cuts=0;
+            i--;
+            if((point2d_L2(curve[i], curve[i+1]) <= e) && (point2d_L2(curve[i+1], curve[i+2]) <= e))
+            {
+                curve.erase(curve.begin()+i+1); // erase element i+1
+                cuts++;
+                total_cuts++;
+            }
+        }
+
+        cout << "filtering cut " << total_cuts << " points out of "<< og_size << endl;
+        return;
+    }
+
     vector<curves::Curve2d> *filter_curves(vector<curves::Curve2d> &curve_dataset, double e)
     {
         vector<curves::Curve2d> *filtered_curve_dataset = new vector<curves::Curve2d>;

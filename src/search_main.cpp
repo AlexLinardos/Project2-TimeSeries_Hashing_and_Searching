@@ -3,6 +3,7 @@
 #include <string>
 #include "../interfaces/NN_interface.hpp"
 #include "../misc/curves.hpp"
+#include "../misc/mean_curve.hpp"
 #include "../TimeSeries-ANN/L2/LSH.hpp"
 #include "../TimeSeries-ANN/L2/HC.hpp"
 #include "../TimeSeries-ANN/DiscreteFrechet/discF_LSH.hpp"
@@ -252,7 +253,7 @@ int main(int argc, char *argv[])
         }
 
         // create a dataset of curves using our original dataset and the time vector
-        for (int i = 0; i < (*dataset).size(); i++)
+        for (int i = 0; i < 100; i++)
         {
             curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
         }
@@ -290,14 +291,15 @@ int main(int argc, char *argv[])
         std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
 
         // perform LSH for continuous Frechet
-        std::cout << "cF LSH." << endl;
-        cFLSH::LSH *cLSH = new cFLSH::LSH(filtered_curves_dataset, 1, 0.05, 3, 8);
-        test = cLSH->search_ANN((*filtered_curves_queryset)[0]);
-        std::cout << "Found aNN with id " << test.first->id << " at cont.frechet distance " << test.second << endl;
-        test2 = cF::search_exactNN((*filtered_curves_queryset)[0], *filtered_curves_dataset);
-        std::cout << "Exact NN has id " << test2.first->id << " and is at cont.frechet distance " << test2.second << endl;
-        delete cLSH;
+        // std::cout << "cF LSH." << endl;
+        // cFLSH::LSH *cLSH = new cFLSH::LSH(filtered_curves_dataset, 1, 0.05, 3, 8);
+        // test = cLSH->search_ANN((*filtered_curves_queryset)[0]);
+        // std::cout << "Found aNN with id " << test.first->id << " at cont.frechet distance " << test.second << endl;
+        // test2 = cF::search_exactNN((*filtered_curves_queryset)[0], *filtered_curves_dataset);
+        // std::cout << "Exact NN has id " << test2.first->id << " and is at cont.frechet distance " << test2.second << endl;
+        // delete cLSH;
         std::cout << "cF LSH done." << endl;
+        mean_of_curves((*curves_dataset));
     }
 
     delete filtered_curves_queryset;

@@ -46,27 +46,20 @@ namespace dF
         {
             c[i] = new double[ql];
         }
-        if (pl != ql)
+        
+        // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
+        for (int i = 0; i < pl; i++)
         {
-            std::cout << "ERROR: Cannot compute discrete Frechet distance for curves with different dimensions." << std::endl;
-            return c;
-        }
-        else
-        {
-            // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
-            for (int i = 0; i < pl; i++)
+            for (int j = 0; j < ql; j++)
             {
-                for (int j = 0; j < ql; j++)
-                {
-                    c[i][j] = -1;
-                }
+                c[i][j] = -1;
             }
-            // base case
-            c[0][0] = L2(p.data[0].x, p.data[0].y, q.data[0].x, q.data[0].y);
-            // compute
-            compute_c(c, pl - 1, ql - 1, p, q);
-            return c;
         }
+        // base case
+        c[0][0] = L2(p.data[0].x, p.data[0].y, q.data[0].x, q.data[0].y);
+        // compute
+        compute_c(c, pl - 1, ql - 1, p, q);
+        return c;
     }
 
     // searches for the exact nearest neighbour of the query curve using brute force approach

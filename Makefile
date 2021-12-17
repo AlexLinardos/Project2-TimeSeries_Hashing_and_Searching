@@ -7,26 +7,26 @@ all: search clean1
 search: search_main.o config.o curve.o frechet.o interval.o point.o simplification.o
 	$(CC) search_main.o config.o curve.o frechet.o interval.o point.o simplification.o -o bin/search $(CFLAGS)
 
-search_main.o: ./TS-NN/search_main.cpp ./TS-NN/Basic/LSH.hpp ./TS-NN/Basic/HC.hpp ./TS-NN/NN_interface.hpp
-	$(CC) -c ./TS-NN/search_main.cpp $(CFLAGS) $(CXXFLAGS)
+search_main.o: ./src/search_main.cpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp ./interfaces/NN_interface.hpp
+	$(CC) -c ./src/search_main.cpp $(CFLAGS) $(CXXFLAGS)
 
-config.o: ./TS-NN/ContinuousFrechet/Fred/config.cpp ./TS-NN/ContinuousFrechet/Fred/config.hpp ./TS-NN/ContinuousFrechet/Fred/types.hpp
-	$(CC) -c ./TS-NN/ContinuousFrechet/Fred/config.cpp $(CFLAGS) $(CXXFLAGS)
+config.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/config.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/config.hpp
+	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/config.cpp $(CFLAGS) $(CXXFLAGS)
 
-curve.o: ./TS-NN/ContinuousFrechet/Fred/curve.cpp ./TS-NN/ContinuousFrechet/Fred/curve.hpp ./TS-NN/ContinuousFrechet/Fred/types.hpp
-	$(CC) -c ./TS-NN/ContinuousFrechet/Fred/curve.cpp $(CFLAGS) $(CXXFLAGS)
+curve.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/curve.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/curve.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
+	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/curve.cpp $(CFLAGS) $(CXXFLAGS)
 
-frechet.o: ./TS-NN/ContinuousFrechet/Fred/frechet.cpp ./TS-NN/ContinuousFrechet/Fred/frechet.hpp ./TS-NN/ContinuousFrechet/Fred/types.hpp
-	$(CC) -c ./TS-NN/ContinuousFrechet/Fred/frechet.cpp $(CFLAGS) $(CXXFLAGS)
+frechet.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/frechet.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/frechet.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
+	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/frechet.cpp $(CFLAGS) $(CXXFLAGS)
 
-interval.o: ./TS-NN/ContinuousFrechet/Fred/interval.cpp ./TS-NN/ContinuousFrechet/Fred/interval.hpp ./TS-NN/ContinuousFrechet/Fred/types.hpp
-	$(CC) -c ./TS-NN/ContinuousFrechet/Fred/interval.cpp $(CFLAGS) $(CXXFLAGS)
+interval.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/interval.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/interval.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
+	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/interval.cpp $(CFLAGS) $(CXXFLAGS)
 
-point.o: ./TS-NN/ContinuousFrechet/Fred/point.cpp ./TS-NN/ContinuousFrechet/Fred/point.hpp ./TS-NN/ContinuousFrechet/Fred/types.hpp
-	$(CC) -c ./TS-NN/ContinuousFrechet/Fred/point.cpp $(CFLAGS) $(CXXFLAGS)
+point.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/point.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/point.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
+	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/point.cpp $(CFLAGS) $(CXXFLAGS)
 
-simplification.o: ./TS-NN/ContinuousFrechet/Fred/simplification.cpp ./TS-NN/ContinuousFrechet/Fred/simplification.hpp ./TS-NN/ContinuousFrechet/Fred/types.hpp
-	$(CC) -c ./TS-NN/ContinuousFrechet/Fred/simplification.cpp $(CFLAGS) $(CXXFLAGS)
+simplification.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
+	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp $(CFLAGS) $(CXXFLAGS)
 
 clean:
 	rm bin/*
