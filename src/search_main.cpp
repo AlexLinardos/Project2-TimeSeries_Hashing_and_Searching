@@ -297,9 +297,9 @@ int main(int argc, char *argv[])
                 // υπολογίζουμε dist(approx NN) / dist(true NN) για κάθε query και κρατάμε το max όλων
                 f = ann.second / true_nn.second;
                 if(f > maf)
-                    maf = f; 
+                    maf = f;
+                output_file << endl; 
             }
-            output_file << endl;
             output_file << "tApproximateAverage: " << lsh_elapsed / CLOCKS_PER_SEC / curves_queryset->size() << endl;;
             output_file << "tTrueAverage: " << brute_elapsed / CLOCKS_PER_SEC / curves_queryset->size() << endl;
             output_file << "MAF: " << maf << endl;
