@@ -30,6 +30,9 @@ int main(int argc, char *argv[])
     vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
     vector<curves::Curve2d> *curves_queryset = new vector<curves::Curve2d>;
 
+    dFLSH::LSH *dLSH;
+    cFLSH::LSH *cLSH;
+
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
         LSH_params lsh_params;
@@ -281,6 +284,11 @@ int main(int argc, char *argv[])
         filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
 
         std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
+
+        // perform LSH for continuous Frechet
+        cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, 2.0, 3, 8);
+        delete cLSH;
+        std::cout << "cF LSH done." << endl;
     }
 
     delete filtered_curves_dataset;
