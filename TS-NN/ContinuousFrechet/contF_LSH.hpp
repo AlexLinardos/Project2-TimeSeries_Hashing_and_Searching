@@ -7,7 +7,8 @@
 #include <math.h>
 #include <set>
 
-#include "con_Frechet.hpp"
+#include "cont_Frechet.hpp"
+#include "../DiscreteFrechet/disc_Frechet.hpp"
 #include "../curves.hpp"
 #include "../Basic/LSH.hpp"
 
@@ -66,7 +67,8 @@ namespace dFLSH
                 item_index_2 = uni(rng);
                 while (item_index_1 == item_index_2)
                     item_index_2 = uni(rng);
-                distance += (cF::c_distance((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
+                distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
+                //distance += (cF::c_distance((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
             }
             windowSize = factor_for_windowSize * (int)distance;
             std::cout << "windowSize :" << windowSize << std::endl;

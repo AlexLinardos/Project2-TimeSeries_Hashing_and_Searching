@@ -3,7 +3,7 @@
 #include "curves.hpp"
 #include "./Basic/LSH.hpp"
 #include "./Basic/HC.hpp"
-#include "./ContinuousFrechet/con_Frechet.hpp"
+#include "./ContinuousFrechet/cont_Frechet.hpp"
 #include "./DiscreteFrechet/disc_Frechet.hpp"
 #include "./DiscreteFrechet/discF_LSH.hpp"
 
