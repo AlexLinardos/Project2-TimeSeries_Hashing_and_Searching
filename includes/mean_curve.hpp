@@ -74,41 +74,41 @@ std::vector<curves::Point2d> mean_curve(curves::Curve2d &p, curves::Curve2d &q)
     return mean;
 }
 
-// calculates mean curve of two given curves using discrete Frechet distance
+// calculates the mean curve of multiple curves given in a std::vector using discrete Frechet distance
 std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
 {
     vector<vector<curves::Point2d>> curves_points;
     int i = 0;
-    int remaining=curves.size();
+    int remaining = curves.size();
 
-    while(remaining>0)
+    while (remaining > 0)
     {
-        if(remaining==1)
+        if (remaining == 1)
         {
             curves_points.push_back(curves[0].data);
-            remaining -=1;
+            remaining -= 1;
         }
         else
         {
-            curves_points.push_back(mean_curve(curves[remaining-2], curves[remaining-1]));
-            remaining -=2;
+            curves_points.push_back(mean_curve(curves[remaining - 2], curves[remaining - 1]));
+            remaining -= 2;
         }
     }
-    //remaining=curves_points.size();
+    // remaining=curves_points.size();
 
-    while (curves_points.size()!=1)
+    while (curves_points.size() != 1)
     {
         cout << curves_points.size() << endl;
-        remaining=curves_points.size();
-        while(remaining>1)
+        remaining = curves_points.size();
+        while (remaining > 1)
         {
             cout << "remaining: " << remaining << endl;
-            curves::Curve2d curve1 = curves::Curve2d("null", curves_points[remaining-2]);
-            curves::Curve2d curve2 = curves::Curve2d("null", curves_points[remaining-1]);
+            curves::Curve2d curve1 = curves::Curve2d("null", curves_points[remaining - 2]);
+            curves::Curve2d curve2 = curves::Curve2d("null", curves_points[remaining - 1]);
             curves_points.push_back(mean_curve(curve1, curve2));
-            curves_points.erase(curves_points.begin() + remaining-1);
-            curves_points.erase(curves_points.begin() + remaining-2);
-            remaining -=2;
+            curves_points.erase(curves_points.begin() + remaining - 1);
+            curves_points.erase(curves_points.begin() + remaining - 2);
+            remaining -= 2;
         }
     }
 
