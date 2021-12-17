@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
     vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
     vector<curves::Curve2d> *curves_queryset = new vector<curves::Curve2d>;
+    vector<curves::Curve2d> *filtered_curves_queryset = new vector<curves::Curve2d>;
 
     dFLSH::LSH *dLSH;
     cFLSH::LSH *cLSH;
@@ -282,17 +283,25 @@ int main(int argc, char *argv[])
         std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
 
         filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
+        filtered_curves_queryset = cF::filter_curves(*curves_queryset, 2.0);
 
         std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
 
         // perform LSH for continuous Frechet
-        cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, 0.05, 3, 8);
+        std::cout << "cF LSH." << endl;
+        cFLSH::LSH *cLSH = new cFLSH::LSH(filtered_curves_dataset, 1, 0.05, 3, 8);
+        test = cLSH->search_ANN((*filtered_curves_queryset)[0]);
+        std::cout << "Found aNN with id " << test.first->id << " at cont.frechet distance " << test.second << endl;
+        test2 = cF::search_exactNN((*filtered_curves_queryset)[0], *filtered_curves_dataset);
+        std::cout << "Exact NN has id " << test2.first->id << " and is at cont.frechet distance " << test2.second << endl;
         delete cLSH;
         std::cout << "cF LSH done." << endl;
     }
 
+    delete filtered_curves_queryset;
     delete filtered_curves_dataset;
     delete curves_dataset;
+    delete curves_queryset;
     delete dataset;
     delete queries;
     return 0;

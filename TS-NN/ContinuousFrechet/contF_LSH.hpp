@@ -276,6 +276,73 @@ namespace cFLSH
                 }
             }
         }
+
+        // searches for the approximate nearest neighbour of the query curve
+        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, int threshold = 0)
+        {
+            int starting_size = query.data.size();
+
+            // we will store current nearest neighbour in curr_NN along with its distance from query
+            vector<double> dummy_vec;
+            for (int i = 0; i < starting_size; i++)
+                dummy_vec.push_back(0.0);
+            curves::Curve2d null_curve = curves::Curve2d("null", dummy_vec, dummy_vec);
+            std::pair<curves::Curve2d *, double> curr_NN;
+            curr_NN.first = &null_curve;
+            curr_NN.second = std::numeric_limits<double>::max();
+
+            int searched = 0; // will be used to check if we reached threshold of checks
+            // for each hash table
+            for (int i = 0; i < this->L; i++)
+            {
+                // snap it to grid (remove consecutive duplicates and minima_maxima)
+                this->h_curves.push_back(this->snap_to_1dgrid(query, t[i]));
+                cF::minima_maxima(h_curves.back());
+
+                // produce vector x
+                this->x_vecs.push_back(h_curves.back());
+
+                // apply padding if needed
+                int new_size = this->x_vecs.back().size(); 
+                if (starting_size > new_size)
+                {
+                    for (int z = new_size; z < starting_size; z++)
+                    {
+                        this->x_vecs.back().push_back(this->padding);
+                    }
+                }
+
+                // create Item object so we can use produce_g from previous project
+                Item *item_for_g = new Item(query.id, this->x_vecs.back());
+
+                // find the bucket
+                long unsigned hval = (*this->g_family).produce_g(*item_for_g);
+                long unsigned bucket = hval % (long unsigned)this->tableSize;
+                delete item_for_g; // we don't need it anymore
+
+                // for each item in the bucket
+                for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
+                {
+                    // check if we bumped into same curve as current nearest before doing calculations
+                    if (this->hashTables[i][bucket][j].curve->id != curr_NN.first->id)
+                    {
+                        double cfd = cF::c_distance(*(this->hashTables[i][bucket][j].curve), query);
+                        // if nearer curve is found
+                        if (cfd < curr_NN.second)
+                        {
+                            // replace curr_NN
+                            curr_NN.first = this->hashTables[i][bucket][j].curve;
+                            curr_NN.second = cfd;
+                        }
+                        searched++;
+                        if (threshold != 0 && searched >= threshold)
+                            return curr_NN;
+                    }
+                }
+            }
+            std::cout << "SEARCHED: " << searched << endl;
+            return curr_NN;
+        }
     };
 }
 
