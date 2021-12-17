@@ -13,7 +13,7 @@ Github repository: https://github.com/AlexLinardos/Project2-TimeSeries_Hashing_a
 * __cluster.conf :__ Contains configuration parameters for clustering.
 * __bin/ :__ Binary files are placed in this directory.
 * __datasets/ :__ This directory contains the datasets used as input or as queries during the implementation.
-* __outputs/ :__ Output files containing the results of the programs after a run are placed here.
+* __outputs/ :__ This directory contains output files with the results of some program runs.
  
 ### Code directories
 *For in-depth information about each file in these directories and the code please refer to the "In-depth Analysis" section further bellow.*
@@ -38,7 +38,7 @@ Please note that the parameters below noted with [M] are mandatory, while parame
   4. L : the number of LSH hash tables
   5. M : the maximum number of vectors to be checked while using Hypercube projection algorithm
   6. probes : the maximum number of hypercube vertices to be checked
-  7. output file[M] : name of the file in which the results of the program will be written
+  7. output file[M] : the path to the file in which the results of the program will be written
   8. algorithm[M] : algorithm to be used for this run (LSH, Hypercube or LSH Frechet)
   9. metric[M*] : type of Frechet distance to be used if LSH for curves (LSH Frechet) algorithm is selected (discrete or continuous)
   10. delta : the size of the grid used in LSH for curves (LSH Frechet) algorithm
@@ -59,8 +59,8 @@ Frechet or Mean Vector> –assignment <Classic or LSH or Hypercube or LSH_Freche
 
 __Examples :__
 
-1. `./search -i ../datasets/nasd_input.csv -q ../datasets/nasd_query.csv -o output.txt -algorithm LSH`
-2. `./search -i ../datasets/nasd_input.csv -q ../datasets/nasd_query.csv -o output.txt -algorithm Frechet -metric discrete -delta 2.0`
+1. `./search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm LSH`
+2. `./search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm Frechet -metric discrete -delta 2.0`
 3. και ενα για cluster
 
 ## In-depth Analysis
