@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include "./TS-NN/DiscreteFrechet/disc_Frechet.hpp"
+
+// finds an optimal traversal between two curves using discrete Frechet distance
+// optimal traversal will be returned in reverse so as to not waste time reversing it
+vector<std::pair<int, int>> optimal_traversal(curves::Curve2d &p, curves::Curve2d &q)
+{
+    // get dynamic programming table from discrete Frechet
+    double **c = dF::discrete_frechet(p, q);
+
+    // initialise empty list(aka vector) of pairs
+    std::vector<std::pair<int, int>> traversal;
+    // pi = m1; qi = m2
+    traversal.push_back(std::make_pair(p.data.size() - 1, q.data.size() - 1));
+    int pi = traversal.back().first;
+    int qi = traversal.back().second;
+    while ((pi != 0) && (qi != 0))
+    {
+        // find next optimal step using the table of discrete Frechet
+        int minIdx_p = pi - 1;
+        int minIdx_q = qi;
+        double mindist = c[pi - 1][qi];
+        if (c[pi][qi - 1] < mindist)
+        {
+            minIdx_p = pi;
+            minIdx_q = qi - 1;
+            mindist = c[pi][qi - 1];
+        }
+        if (c[pi - 1][qi - 1] < mindist)
+        {
+            minIdx_p = pi - 1;
+            minIdx_q = qi - 1;
+            // mindist = c[pi - 1][qi - 1];
+        }
+        // add optimal step found to optimal traversal
+        traversal.push_back(std::make_pair(minIdx_p, minIdx_q));
+        pi = minIdx_p;
+        qi = minIdx_q;
+    }
+    // corner-cases of endgame
+    while (pi != 0) // if curve p still has steps to go but q has ended
+    {
+        traversal.push_back(std::make_pair(pi - 1, qi));
+        pi--;
+    }
+    while (qi != 0) // if curve q still has steps to go but p has ended
+    {
+        traversal.push_back(std::make_pair(pi, qi - 1));
+        qi--;
+    }
+    return traversal; // Warning: traversal is returned in reverse so as to save time
+}
+
+// calculates mean curve of two given curves using discrete Frechet distance
+std::vector<curves::Point2d> mean_curve(curves::Curve2d &p, curves::Curve2d &q)
+{
+    std::vector<curves::Point2d> mean;
+    std::vector<std::pair<int, int>> opt_traversal = optimal_traversal(p, q);
+
+    // iterate in reverse because optimal traversal will be return in reverse from optimal_traversal(p,q)
+    for (int t = opt_traversal.size() - 1; t >= 0; t--)
+    {
+        std::pair<int, int> traversal_indexes = opt_traversal[t];
+        double pit_x = p.data[traversal_indexes.first].x;
+        double pit_y = p.data[traversal_indexes.first].y;
+        double qit_x = q.data[traversal_indexes.second].x;
+        double qit_y = q.data[traversal_indexes.second].y;
+        mean.push_back(curves::Point2d((pit_x + qit_x) / 2, (pit_y + qit_y) / 2));
+    }
+    return mean;
+}
