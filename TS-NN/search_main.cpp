@@ -3,8 +3,7 @@
 #include "curves.hpp"
 #include "./Basic/LSH.hpp"
 #include "./Basic/HC.hpp"
-#include "./ContinuousFrechet/cont_Frechet.hpp"
-#include "./DiscreteFrechet/disc_Frechet.hpp"
+#include "./ContinuousFrechet/contF_LSH.hpp"
 #include "./DiscreteFrechet/discF_LSH.hpp"
 
 // ./bin/search -i <input file> -q <query file> -k 1 -L 2 -M 3 -probes 4 -o <output file> -algorithm <LSH> -metric <discrete> -delta 5.01
