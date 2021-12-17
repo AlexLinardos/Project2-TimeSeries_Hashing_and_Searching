@@ -3,8 +3,8 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#include "../utils.hpp"
-#include "../curves.hpp"
+#include "../../misc/utils.hpp"
+#include "../../misc/curves.hpp"
 
 namespace dF
 {
@@ -98,6 +98,5 @@ namespace dF
         }
         return curr_NN;
     }
-
 }
 #endif

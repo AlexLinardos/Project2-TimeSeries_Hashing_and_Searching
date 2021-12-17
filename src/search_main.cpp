@@ -1,10 +1,12 @@
 #include <iostream>
-#include "NN_interface.hpp"
-#include "curves.hpp"
-#include "./Basic/LSH.hpp"
-#include "./Basic/HC.hpp"
-#include "./ContinuousFrechet/contF_LSH.hpp"
-#include "./DiscreteFrechet/discF_LSH.hpp"
+#include <vector>
+#include <string>
+#include "../interfaces/NN_interface.hpp"
+#include "../misc/curves.hpp"
+#include "../TimeSeries-ANN/L2/LSH.hpp"
+#include "../TimeSeries-ANN/L2/HC.hpp"
+#include "../TimeSeries-ANN/DiscreteFrechet/discF_LSH.hpp"
+#include "../TimeSeries-ANN/ContinuousFrechet/contF_LSH.hpp"
 
 // ./bin/search -i <input file> -q <query file> -k 1 -L 2 -M 3 -probes 4 -o <output file> -algorithm <LSH> -metric <discrete> -delta 5.01
 int main(int argc, char *argv[])

@@ -1,10 +1,12 @@
 #ifndef LSH_HPP
 #define LSH_HPP
-#include "hashing.hpp"
+#include <iostream>
 #include <algorithm>
 #include <string>
 #include <vector>
 #include <cmath>
+#include <random>
+#include "./hashing.hpp"
 
 // class to hold parameters of LSH algorithm
 class LSH_params

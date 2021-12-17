@@ -1,8 +1,10 @@
+#ifndef CON_FRECHET_HPP
+#define CON_FRECHET_HPP
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#include "../utils.hpp"
-#include "../curves.hpp"
+#include "../../misc/utils.hpp"
+#include "../../misc/curves.hpp"
 
 #include "./Fred/frechet.hpp"
 
@@ -51,10 +53,10 @@ namespace cF
     // {
     //     return Frechet::Continuous::distance(vecToCurve(item1), vecToCurve(item2)).value;
     // }
-    
-    double c_distance(curves::Curve2d &item1,  curves::Curve2d &item2)
+
+    double c_distance(curves::Curve2d &item1, curves::Curve2d &item2)
     {
-        return Frechet::Continuous::distance(fredCurve(item1) , fredCurve(item2)).value;
+        return Frechet::Continuous::distance(fredCurve(item1), fredCurve(item2)).value;
     }
 
     // searches for the exact nearest neighbour of the query curve using brute force approach
@@ -87,3 +89,4 @@ namespace cF
         return curr_NN;
     }
 }
+#endif

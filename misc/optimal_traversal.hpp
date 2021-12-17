@@ -1,7 +1,10 @@
+#ifndef OPT_TRAVERSAL_HPP
+#define OPT_TRAVERSAL_HPP
 #include <iostream>
 #include <vector>
 #include <string>
-#include "./TS-NN/DiscreteFrechet/disc_Frechet.hpp"
+#include "./curves.hpp"
+#include "../TimeSeries-ANN/DiscreteFrechet/disc_Frechet.hpp"
 
 // finds an optimal traversal between two curves using discrete Frechet distance
 // optimal traversal will be returned in reverse so as to not waste time reversing it
@@ -53,21 +56,4 @@ vector<std::pair<int, int>> optimal_traversal(curves::Curve2d &p, curves::Curve2
     return traversal; // Warning: traversal is returned in reverse so as to save time
 }
 
-// calculates mean curve of two given curves using discrete Frechet distance
-std::vector<curves::Point2d> mean_curve(curves::Curve2d &p, curves::Curve2d &q)
-{
-    std::vector<curves::Point2d> mean;
-    std::vector<std::pair<int, int>> opt_traversal = optimal_traversal(p, q);
-
-    // iterate in reverse because optimal traversal will be return in reverse from optimal_traversal(p,q)
-    for (int t = opt_traversal.size() - 1; t >= 0; t--)
-    {
-        std::pair<int, int> traversal_indexes = opt_traversal[t];
-        double pit_x = p.data[traversal_indexes.first].x;
-        double pit_y = p.data[traversal_indexes.first].y;
-        double qit_x = q.data[traversal_indexes.second].x;
-        double qit_y = q.data[traversal_indexes.second].y;
-        mean.push_back(curves::Point2d((pit_x + qit_x) / 2, (pit_y + qit_y) / 2));
-    }
-    return mean;
-}
+#endif
