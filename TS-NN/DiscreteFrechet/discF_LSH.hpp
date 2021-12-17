@@ -164,16 +164,22 @@ namespace dFLSH
                     // snap it to grid
                     this->h_curves.push_back(this->produce_h((*dataset)[j], tx, ty));
                     int new_size = this->h_curves.back().size();
+
+                    // produce vector x
+                    this->x_vecs.push_back(this->concat_points(this->h_curves.back()));
+
                     // apply padding if needed
                     if (starting_size > new_size)
                     {
                         for (int z = new_size; z < starting_size; z++)
                         {
-                            this->h_curves.back().push_back(curves::Point2d(this->padding, this->padding));
+                            // this->h_curves.back().push_back(curves::Point2d(this->padding, this->padding)); 
+                            this->x_vecs.back().push_back(this->padding);
+                            this->x_vecs.back().push_back(this->padding);
+                            /* αντί δηλαδή να κάνει padding 2dpoints και μετα concat, κάνει concat και μετά padding 2*1dpoints για κάθε 2dpoint */
                         }
                     }
-                    // produce vector x
-                    this->x_vecs.push_back(this->concat_points(this->h_curves.back()));
+                
                     // create Association between curve, grid-curve and vector
                     Association ass = Association(&(*dataset)[j], &this->h_curves.back(), &this->x_vecs.back());
                     // create Item object so we can use produce_g from previous project
