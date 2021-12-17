@@ -8,7 +8,7 @@
 #include <set>
 #include <limits>
 #include "./disc_Frechet.hpp"
-#include "../../misc/curves.hpp"
+#include "../../includes/curves.hpp"
 #include "../L2/LSH.hpp"
 
 namespace dFLSH

@@ -3,8 +3,8 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#include "../../misc/utils.hpp"
-#include "../../misc/curves.hpp"
+#include "../../includes/utils.hpp"
+#include "../../includes/curves.hpp"
 
 #include "./Fred/frechet.hpp"
 

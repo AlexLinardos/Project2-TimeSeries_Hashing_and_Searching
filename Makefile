@@ -7,7 +7,7 @@ all: search clean1
 search: search_main.o config.o curve.o frechet.o interval.o point.o simplification.o
 	$(CC) search_main.o config.o curve.o frechet.o interval.o point.o simplification.o -o bin/search $(CFLAGS)
 
-search_main.o: ./src/search_main.cpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp ./interfaces/NN_interface.hpp
+search_main.o: ./src/search_main.cpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp ./ui/NN_interface.hpp
 	$(CC) -c ./src/search_main.cpp $(CFLAGS) $(CXXFLAGS)
 
 config.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/config.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/config.hpp

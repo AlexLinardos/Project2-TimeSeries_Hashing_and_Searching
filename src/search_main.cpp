@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "../interfaces/NN_interface.hpp"
-#include "../misc/curves.hpp"
-#include "../misc/mean_curve.hpp"
+#include "../ui/NN_interface.hpp"
+#include "../includes/curves.hpp"
+#include "../includes/mean_curve.hpp"
 #include "../TimeSeries-ANN/L2/LSH.hpp"
 #include "../TimeSeries-ANN/L2/HC.hpp"
 #include "../TimeSeries-ANN/DiscreteFrechet/discF_LSH.hpp"

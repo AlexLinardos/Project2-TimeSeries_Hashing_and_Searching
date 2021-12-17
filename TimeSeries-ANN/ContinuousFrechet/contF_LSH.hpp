@@ -9,7 +9,7 @@
 
 #include "./cont_Frechet.hpp"
 #include "../DiscreteFrechet/disc_Frechet.hpp"
-#include "../../misc/curves.hpp"
+#include "../../includes/curves.hpp"
 #include "../L2/LSH.hpp"
 
 namespace cF
