@@ -227,7 +227,7 @@ namespace NNi
                 this->probes = 0;
                 this->output_f = "output.txt";
                 this->algorithm = "Frechet"; // LSH - Hypercube - Frechet
-                this->metric = "none";       // discrete - continuous
+                this->metric = "discrete";       // discrete - continuous
                 this->delta = 0.0;
             }
             else if (argc % 2 == 1) // normal run

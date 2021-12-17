@@ -29,13 +29,22 @@ int main(int argc, char *argv[])
     read_items(dataset, params.input_f);
     vector<Item> *queries = new vector<Item>;
     read_items(queries, params.query_f);
-    vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
-    vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
-    vector<curves::Curve2d> *curves_queryset = new vector<curves::Curve2d>;
-    vector<curves::Curve2d> *filtered_curves_queryset = new vector<curves::Curve2d>;
 
-    dFLSH::LSH *dLSH;
-    cFLSH::LSH *cLSH;
+    std::vector<std::pair<double, Item *>> knns;
+    std::vector<std::pair<double, Item *>> true_knns;
+    std::vector<std::pair<double, Item *>> r;
+
+    std::chrono::steady_clock::time_point lsh_begin;
+    std::chrono::steady_clock::time_point lsh_end;
+    std::chrono::steady_clock::time_point true_begin;
+    std::chrono::steady_clock::time_point true_end;
+
+    double error = 0.0;
+    double avg_error = 0.0;
+    double lsh_elapsed = 0.0;
+    double brute_elapsed = 0.0;
+    double maf = 0.0;
+    double f = 0.0;
 
     if (params.algorithm == "LSH")
     { // pass parameters to LSH_params class so we can use code from previous project
@@ -51,22 +60,8 @@ int main(int argc, char *argv[])
 
         std::cout << "Searching for " << lsh_params.N << " nearest neighbors..." << std::endl;
 
-        std::vector<std::pair<double, Item *>> knns;
-        std::vector<std::pair<double, Item *>> true_knns;
-        std::vector<std::pair<double, Item *>> r;
-
-        std::chrono::steady_clock::time_point lsh_begin;
-        std::chrono::steady_clock::time_point lsh_end;
-        std::chrono::steady_clock::time_point true_begin;
-        std::chrono::steady_clock::time_point true_end;
-
-        double error = 0.0;
-        double avg_error = 0.0;
-
         ofstream output_file;
         output_file.open(params.output_f);
-        double lsh_elapsed = 0.0;
-        double brute_elapsed = 0.0;
         clock_t begin;
         clock_t end;
 
@@ -155,22 +150,8 @@ int main(int argc, char *argv[])
 
         std::cout << "Searching for " << cube_params.N << " nearest neighbors..." << std::endl;
 
-        std::vector<std::pair<double, Item *>> knns;
-        std::vector<std::pair<double, Item *>> true_knns;
-        std::vector<std::pair<double, Item *>> r;
-
-        std::chrono::steady_clock::time_point lsh_begin;
-        std::chrono::steady_clock::time_point lsh_end;
-        std::chrono::steady_clock::time_point true_begin;
-        std::chrono::steady_clock::time_point true_end;
-
-        double error = 0.0;
-        double avg_error = 0.0;
-
         ofstream output_file;
         output_file.open(cube_params.out_file);
-        double lsh_elapsed = 0.0;
-        double brute_elapsed = 0.0;
         clock_t begin;
         clock_t end;
 
@@ -245,6 +226,12 @@ int main(int argc, char *argv[])
     if (params.algorithm == "Frechet")
     {
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
+
+        vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
+        vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
+        vector<curves::Curve2d> *curves_queryset = new vector<curves::Curve2d>;
+        vector<curves::Curve2d> *filtered_curves_queryset = new vector<curves::Curve2d>;
+
         // create a vector that will help us represent time
         vector<double> t_dimension;
         for (int i = 0; i < (*dataset)[0].xij.size(); i++)
@@ -264,48 +251,124 @@ int main(int argc, char *argv[])
             curves_queryset->push_back(curves::Curve2d((*queries)[i].id, t_dimension, (*queries)[i].xij));
         }
 
-        // perform LSH for discrete Frechet
-        dFLSH::LSH *dLSH = new dFLSH::LSH(curves_dataset, params.L, 2.0, 3, 8);
-        std::pair<curves::Curve2d *, double> test = dLSH->search_ANN((*curves_queryset)[0]);
-        std::cout << "Found aNN with id " << test.first->id << " at frechet distance " << test.second << endl;
-        std::pair<curves::Curve2d *, double> test2 = dF::search_exactNN((*curves_queryset)[0], *curves_dataset);
-        std::cout << "Exact NN has id " << test2.first->id << " and is at frechet distance " << test2.second << endl;
-        delete dLSH;
-
-        int size1 = (*curves_dataset)[0].data.size();
-        int size2 = (*curves_dataset)[1].data.size();
-        double **arr = dF::discrete_frechet((*curves_dataset)[0], (*curves_queryset)[0]);
-        std::cout << "Test Frechet: " << arr[size1 - 1][size2 - 1] << std::endl;
-        for (int i = 0; i < size1; i++)
+        if (params.metric == "discrete")
         {
-            delete[] arr[i];
+            // perform LSH for discrete Frechet
+            dFLSH::LSH *dLSH = new dFLSH::LSH(curves_dataset, params.L, 2.0, 3, 8);
+
+            std::cout << "Searching for approximate nearest neighbor..." << std::endl;
+            ofstream output_file;
+            output_file.open(params.output_f);
+            clock_t begin;
+            clock_t end;
+
+            std::pair<curves::Curve2d *, double> test = dLSH->search_ANN((*curves_queryset)[0]);
+
+            std::cout << "Found aNN with id " << test.first->id << " at frechet distance " << test.second << endl;
+
+            std::pair<curves::Curve2d *, double> test2 = dF::search_exactNN((*curves_queryset)[0], *curves_dataset);
+
+            std::cout << "Exact NN has id " << test2.first->id << " and is at frechet distance " << test2.second << endl;
+
+            output_file << "Algorithm: LSH_Frechet_Discrete" << endl;
+            for (int i = 0; i < queries->size(); i++)
+            {
+                output_file << "Query: " << (*curves_queryset)[i].id << endl;
+
+                // cout << "[ANN]" << endl;
+                lsh_begin = std::chrono::steady_clock::now();
+                begin = clock();
+                std::pair<curves::Curve2d *, double> ann = dLSH->search_ANN((*curves_queryset)[i]);
+                end = clock();
+                lsh_end = std::chrono::steady_clock::now();
+                lsh_elapsed += double(end - begin);
+
+                // cout << "[Brute Force]" << endl;
+                true_begin = std::chrono::steady_clock::now();
+                begin = clock();
+                std::pair<curves::Curve2d *, double> true_nn = dF::search_exactNN((*curves_queryset)[i], *curves_dataset);
+                end = clock();
+                true_end = std::chrono::steady_clock::now();
+                brute_elapsed += double(end - begin);
+
+                if (ann.first->id == "null")
+                {
+                    output_file << "Approximate Nearest neighbor " << "NOT FOUND" << endl;
+                    continue;
+                }
+                output_file << "Approximate Nearest neighbor: " << ann.first->id << endl;
+                output_file << "True Nearest neighbor: " << true_nn.first->id << endl;
+                output_file << "distanceApproximate: " << ann.second << endl;
+                output_file << "distanceTrue: " << true_nn.second << endl;
+                error += (ann.second / true_nn.second); // sum distLSH/distTrue of the nearest neigbor of a Query
+
+                // υπολογίζουμε dist(approx NN) / dist(true NN) για κάθε query και κρατάμε το max όλων
+                f = ann.second / true_nn.second;
+                if(f > maf)
+                    maf = f; 
+                
+
+                // if (error != 0)
+                // {
+                //     avg_error += error / (double)neighboors_returned; // sum avg(distLSH/distTrue) of the returned nearest neigbors of a Query for all the Queries
+                //     error = 0;
+                // }
+                // neighboors_returned = 0;
+                // cout << meso_error << endl;
+            }
+            output_file << endl;
+            output_file << "tApproximateAverage: " << lsh_elapsed / CLOCKS_PER_SEC / queries->size() << endl;;
+            output_file << "tTrueAverage: " << brute_elapsed / CLOCKS_PER_SEC / queries->size() << endl;
+            output_file << "MAF: " << maf << endl;
+
+            // cout << "[EVALUATION]" << endl;
+
+            // lsh_elapsed = lsh_elapsed / CLOCKS_PER_SEC;
+            // brute_elapsed = brute_elapsed / CLOCKS_PER_SEC;
+            // cout << "tCUBE/tTrue: " << (lsh_elapsed * 1000000.0) / (brute_elapsed * 1000000.0) << endl;
+
+            // avg_error = avg_error / (double)queries->size(); // calculate avg distLSH/distTrue across all Queries
+
+            // cout << "distCUBE/distTrue (avg): " << avg_error << endl;
+
+            output_file.close();
+
+            delete dLSH;
         }
-        delete[] arr;
+        else if (params.metric == "continuous")
+        {
+            // perform LSH for continuous Frechet
+            cFLSH::LSH *cLSH = new cFLSH::LSH(filtered_curves_dataset, 1, 0.05, 3, 8);
 
-        // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
-        std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
+            std::cout << "Searching for approximate nearest neighbor..." << std::endl;
+            ofstream output_file;
+            output_file.open(params.output_f);
+            clock_t begin;
+            clock_t end;
 
-        filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
-        filtered_curves_queryset = cF::filter_curves(*curves_queryset, 2.0);
+            // std::cout << "RESULT: " << cF::distance((*dataset)[0], (*dataset)[1]) << endl;
+            std::cout << "cF of original: " << cF::c_distance((*curves_dataset)[0], (*curves_dataset)[1]) << endl;
 
-        std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
+            filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
+            filtered_curves_queryset = cF::filter_curves(*curves_queryset, 2.0);
 
-        // perform LSH for continuous Frechet
-        // std::cout << "cF LSH." << endl;
-        // cFLSH::LSH *cLSH = new cFLSH::LSH(filtered_curves_dataset, 1, 0.05, 3, 8);
-        // test = cLSH->search_ANN((*filtered_curves_queryset)[0]);
-        // std::cout << "Found aNN with id " << test.first->id << " at cont.frechet distance " << test.second << endl;
-        // test2 = cF::search_exactNN((*filtered_curves_queryset)[0], *filtered_curves_dataset);
-        // std::cout << "Exact NN has id " << test2.first->id << " and is at cont.frechet distance " << test2.second << endl;
-        // delete cLSH;
-        std::cout << "cF LSH done." << endl;
-        mean_of_curves((*curves_dataset));
+            std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
+
+            // test = cLSH->search_ANN((*filtered_curves_queryset)[0]);
+            // std::cout << "Found aNN with id " << test.first->id << " at cont.frechet distance " << test.second << endl;
+            // test2 = cF::search_exactNN((*filtered_curves_queryset)[0], *filtered_curves_dataset);
+            // std::cout << "Exact NN has id " << test2.first->id << " and is at cont.frechet distance " << test2.second << endl;
+            // delete cLSH;
+            std::cout << "cF LSH done." << endl;
+            mean_of_curves((*curves_dataset));
+        }
+
+        delete filtered_curves_queryset;
+        delete filtered_curves_dataset;
+        delete curves_dataset;
+        delete curves_queryset;
     }
 
-    delete filtered_curves_queryset;
-    delete filtered_curves_dataset;
-    delete curves_dataset;
-    delete curves_queryset;
     delete dataset;
     delete queries;
     return 0;
