@@ -174,15 +174,15 @@ namespace cFLSH
             // Hash all items in dataset and insert them into their buckets
 
 
-            // this->dataset_hashing();
-            // for (int i = 0; i < this->L; i++)
-            // {
-            //     std::cout << "TABLE " << i << std::endl;
-            //     for (int j = 0; j < this->tableSize; j++)
-            //     {
-            //         std::cout << "BUCKET " << j << " has " << this->hashTables[i][j].size() << std::endl;
-            //     }
-            // }
+            this->dataset_hashing();
+            for (int i = 0; i < this->L; i++)
+            {
+                std::cout << "TABLE " << i << std::endl;
+                for (int j = 0; j < this->tableSize; j++)
+                {
+                    std::cout << "BUCKET " << j << " has " << this->hashTables[i][j].size() << std::endl;
+                }
+            }
         };
 
         ~LSH()
