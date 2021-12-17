@@ -173,13 +173,12 @@ namespace dFLSH
                     {
                         for (int z = new_size; z < starting_size; z++)
                         {
-                            // this->h_curves.back().push_back(curves::Point2d(this->padding, this->padding)); 
+                            // apply twice because curve is 2d
                             this->x_vecs.back().push_back(this->padding);
                             this->x_vecs.back().push_back(this->padding);
-                            /* αντί δηλαδή να κάνει padding 2dpoints και μετα concat, κάνει concat και μετά padding 2*1dpoints για κάθε 2dpoint */
                         }
                     }
-                
+
                     // create Association between curve, grid-curve and vector
                     Association ass = Association(&(*dataset)[j], &this->h_curves.back(), &this->x_vecs.back());
                     // create Item object so we can use produce_g from previous project
@@ -215,16 +214,20 @@ namespace dFLSH
                 // snap it to grid
                 vector<curves::Point2d> grid_curve = this->produce_h(query, this->shifts[i].first, this->shifts[i].second);
                 int new_size = grid_curve.size();
+
+                // produce vector x
+                vector<double> x_vec = this->concat_points(grid_curve);
+
                 // apply padding if needed
                 if (starting_size > new_size)
                 {
                     for (int z = new_size; z < starting_size; z++)
                     {
-                        grid_curve.push_back(curves::Point2d(this->padding, this->padding));
+                        // apply twice because curve is 2d
+                        x_vec.push_back(this->padding);
+                        x_vec.push_back(this->padding);
                     }
                 }
-                // produce vector x
-                vector<double> x_vec = this->concat_points(grid_curve);
 
                 // create Item object so we can use produce_g from previous project
                 Item *item_for_g = new Item(query.id, x_vec);
