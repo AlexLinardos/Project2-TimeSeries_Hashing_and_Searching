@@ -105,12 +105,12 @@ namespace cFLSH
     {
     public:
         curves::Curve2d *curve;
-        vector<curves::Point2d> *grid_curve;
+        vector<double> *grid_curve;
         vector<double> *x;
 
-        Association(curves::Curve2d *curve, vector<curves::Point2d> *grid_curve, vector<double> *x) : curve(curve),
-                                                                                                      grid_curve(grid_curve),
-                                                                                                      x(x) {}
+        Association(curves::Curve2d *curve, vector<double> *grid_curve, vector<double> *x) : curve(curve),
+                                                                                                grid_curve(grid_curve),
+                                                                                                x(x) {}
     };
 
     class LSH
@@ -124,10 +124,12 @@ namespace cFLSH
         int tableSize;
         int datasize;
         int windowSize;                           // size of each table
-        vector<vector<curves::Point2d>> h_curves; // stores grid-curves
-        vector<vector<double>> x_vecs;            // stores real vectors x
+        vector<vector<double>> h_curves; // stores grid-curves after snapping and minima_maxima
+        vector<vector<double>> x_vecs;            // stores real vectors x (after padding)
         std::vector<Association> **hashTables;    // Association* hashTables;
         double *t;                  // stores shifts for all grids
+        double padding = 10000; 
+        G *g_family;
 
     public:
         LSH(vector<curves::Curve2d> *dataset, int L, double delta, int factor_for_windowSize, int divisor_for_tableSize) : dataset(dataset),
@@ -159,13 +161,14 @@ namespace cFLSH
             windowSize = factor_for_windowSize * (int)distance;
             std::cout << "windowSize :" << windowSize << std::endl;
 
+            this->g_family = new G(4, this->tableSize, this->windowSize, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
             // Initialize L hashTables, Grids(shifted_deltas)
             hashTables = new std::vector<Association> *[L];
             t = new double[L];
             for (int i = 0; i < L; i++) // for every hashTable
             {
                 hashTables[i] = new std::vector<Association>[tableSize];
-                // t[i] =
+                t[i] = urd(eng);
             }
 
             // Hash all items in dataset and insert them into their buckets
@@ -184,6 +187,7 @@ namespace cFLSH
 
         ~LSH()
         {
+            delete this->g_family;
             for (int i = 0; i < this->L; i++)
             {
                 delete[] hashTables[i];
@@ -193,16 +197,16 @@ namespace cFLSH
         }
 
         // maps curve P to a 1D grid
-        vector<double> snap_to_1dgrid(curves::Curve2d * curve, double t)
+        vector<double> snap_to_1dgrid(curves::Curve2d &curve, double t)
         {
-            int starting_size = curve->data.size();
+            int starting_size = curve.data.size();
             vector<double> snap_pis;
 
             // follow <<xi' = floor((x-t)/δ + 1/2)*δ + t>> formula to perform snapping
             for (int i = 0; i < starting_size; i++)
             {
-                double snap_x = floor((curve->data[i].x - t) / this->delta + 0.5) * this->delta + t;
-                double snap_y = floor((curve->data[i].y - t) / this->delta + 0.5) * this->delta + t;
+                double snap_x = floor((curve.data[i].x - t) / this->delta + 0.5) * this->delta + t;
+                double snap_y = floor((curve.data[i].y - t) / this->delta + 0.5) * this->delta + t;
                 snap_pis.push_back(snap_x);
                 snap_pis.push_back(snap_y);
             }
@@ -226,6 +230,49 @@ namespace cFLSH
         
 
         // performs hashing to assing Association items to buckets
+        void dataset_hashing()
+        {
+            // repeat L times (where is L is the number of tables)
+            for (int i = 0; i < this->L; i++)
+            {
+                // for each curve
+                for (int j = 0; j < this->dataset->size(); j++)
+                {
+                    int starting_size = (*dataset)[j].data.size();
+
+                    // snap it to grid (remove consecutive duplicates and minima_maxima)
+                    this->h_curves.push_back(this->snap_to_1dgrid((*dataset)[j], t[i]));
+                    cF::minima_maxima(h_curves.back());
+
+                    // produce vector x
+                    this->x_vecs.push_back(h_curves.back());
+
+                    // apply padding if needed
+                    int new_size = this->x_vecs.back().size(); 
+                    if (starting_size > new_size)
+                    {
+                        for (int z = new_size; z < starting_size; z++)
+                        {
+                            this->x_vecs.back().push_back(this->padding);
+                        }
+                    }
+
+                    // create Association between curve, grid-curve and x_vector
+                    Association ass = Association(&(*dataset)[j], &this->h_curves.back(), &this->x_vecs.back());
+
+                    // create Item object so we can use produce_g from previous project
+                    Item *item_for_g = new Item((*dataset)[j].id, this->x_vecs.back());
+
+                    // get item hash value
+                    unsigned int hval = (*this->g_family).produce_g(*item_for_g);
+                    unsigned int pos = hval % (long unsigned)this->tableSize;
+                    delete item_for_g; // we don't need it anymore
+
+                    // store association in table
+                    this->hashTables[i][pos].push_back(ass);
+                }
+            }
+        }
     };
 }
 
