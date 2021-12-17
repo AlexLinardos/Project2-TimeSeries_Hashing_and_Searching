@@ -225,7 +225,7 @@ namespace NNi
                 this->L = 5;
                 this->M = 0;
                 this->probes = 0;
-                this->output_f = "output.txt";
+                this->output_f = "outputs/output.txt";
                 this->algorithm = "Frechet"; // LSH - Hypercube - Frechet
                 this->metric = "discrete";       // discrete - continuous
                 this->delta = 0.0;

@@ -39,6 +39,9 @@ int main(int argc, char *argv[])
     std::chrono::steady_clock::time_point true_begin;
     std::chrono::steady_clock::time_point true_end;
 
+    clock_t begin;
+    clock_t end;
+
     double error = 0.0;
     double avg_error = 0.0;
     double lsh_elapsed = 0.0;
@@ -62,9 +65,6 @@ int main(int argc, char *argv[])
 
         ofstream output_file;
         output_file.open(params.output_f);
-        clock_t begin;
-        clock_t end;
-
         for (int i = 0; i < (*queries).size(); i++)
         {
             output_file << "Query: " << (*queries)[i].id << endl;
@@ -152,8 +152,6 @@ int main(int argc, char *argv[])
 
         ofstream output_file;
         output_file.open(cube_params.out_file);
-        clock_t begin;
-        clock_t end;
 
         for (int i = 0; i < queries->size(); i++)
         {
@@ -256,22 +254,12 @@ int main(int argc, char *argv[])
             // perform LSH for discrete Frechet
             dFLSH::LSH *dLSH = new dFLSH::LSH(curves_dataset, params.L, 2.0, 3, 8);
 
-            std::cout << "Searching for approximate nearest neighbor..." << std::endl;
+            std::cout << "Searching for the approximate nearest neighbors of the query curves..." << std::endl;
             ofstream output_file;
             output_file.open(params.output_f);
-            clock_t begin;
-            clock_t end;
-
-            std::pair<curves::Curve2d *, double> test = dLSH->search_ANN((*curves_queryset)[0]);
-
-            std::cout << "Found aNN with id " << test.first->id << " at frechet distance " << test.second << endl;
-
-            std::pair<curves::Curve2d *, double> test2 = dF::search_exactNN((*curves_queryset)[0], *curves_dataset);
-
-            std::cout << "Exact NN has id " << test2.first->id << " and is at frechet distance " << test2.second << endl;
 
             output_file << "Algorithm: LSH_Frechet_Discrete" << endl;
-            for (int i = 0; i < queries->size(); i++)
+            for (int i = 0; i < curves_queryset->size(); i++)
             {
                 output_file << "Query: " << (*curves_queryset)[i].id << endl;
 
@@ -291,6 +279,8 @@ int main(int argc, char *argv[])
                 true_end = std::chrono::steady_clock::now();
                 brute_elapsed += double(end - begin);
 
+                int neighboors_returned = 0;
+
                 if (ann.first->id == "null")
                 {
                     output_file << "Approximate Nearest neighbor " << "NOT FOUND" << endl;
@@ -302,34 +292,23 @@ int main(int argc, char *argv[])
                 output_file << "distanceTrue: " << true_nn.second << endl;
                 error += (ann.second / true_nn.second); // sum distLSH/distTrue of the nearest neigbor of a Query
 
+                neighboors_returned++;
+
                 // υπολογίζουμε dist(approx NN) / dist(true NN) για κάθε query και κρατάμε το max όλων
                 f = ann.second / true_nn.second;
                 if(f > maf)
                     maf = f; 
-                
-
-                // if (error != 0)
-                // {
-                //     avg_error += error / (double)neighboors_returned; // sum avg(distLSH/distTrue) of the returned nearest neigbors of a Query for all the Queries
-                //     error = 0;
-                // }
-                // neighboors_returned = 0;
-                // cout << meso_error << endl;
             }
             output_file << endl;
-            output_file << "tApproximateAverage: " << lsh_elapsed / CLOCKS_PER_SEC / queries->size() << endl;;
-            output_file << "tTrueAverage: " << brute_elapsed / CLOCKS_PER_SEC / queries->size() << endl;
+            output_file << "tApproximateAverage: " << lsh_elapsed / CLOCKS_PER_SEC / curves_queryset->size() << endl;;
+            output_file << "tTrueAverage: " << brute_elapsed / CLOCKS_PER_SEC / curves_queryset->size() << endl;
             output_file << "MAF: " << maf << endl;
 
-            // cout << "[EVALUATION]" << endl;
-
-            // lsh_elapsed = lsh_elapsed / CLOCKS_PER_SEC;
-            // brute_elapsed = brute_elapsed / CLOCKS_PER_SEC;
-            // cout << "tCUBE/tTrue: " << (lsh_elapsed * 1000000.0) / (brute_elapsed * 1000000.0) << endl;
-
-            // avg_error = avg_error / (double)queries->size(); // calculate avg distLSH/distTrue across all Queries
-
-            // cout << "distCUBE/distTrue (avg): " << avg_error << endl;
+            cout << "[EVALUATION]" << endl;
+            lsh_elapsed = lsh_elapsed / CLOCKS_PER_SEC;
+            brute_elapsed = brute_elapsed / CLOCKS_PER_SEC;
+            cout << "tdF_LSH/tTrue: " << (lsh_elapsed * 1000000.0) / (brute_elapsed * 1000000.0) << endl;
+            cout << "distdF_LSH/distTrue (avg): " << error / (double)curves_queryset->size() << endl;
 
             output_file.close();
 

@@ -30,6 +30,7 @@ simplification.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp ./T
 
 clean:
 	rm bin/*
+	rm outputs/*
 
 clean1:
 	rm *.o

@@ -258,7 +258,7 @@ namespace dFLSH
                     }
                 }
             }
-            std::cout << "SEARCHED: " << searched << endl;
+            //std::cout << "SEARCHED: " << searched << endl;
             return curr_NN;
         }
     };
