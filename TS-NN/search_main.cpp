@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
         std::cout << "cF of filtered: " << cF::c_distance((*filtered_curves_dataset)[0], (*filtered_curves_dataset)[1]) << endl;
 
         // perform LSH for continuous Frechet
-        cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, 2.0, 3, 8);
+        cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, 0.05, 3, 8);
         delete cLSH;
         std::cout << "cF LSH done." << endl;
     }

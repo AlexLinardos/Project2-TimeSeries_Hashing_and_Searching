@@ -25,10 +25,12 @@ namespace cF
         while(i+2 < p.size())
         {
             cuts=0;
-            if ((p[i+1] >= min(p[i], p[i+2])) || (p[i+1] >= max(p[i], p[i+2])))
+            if (((p[i+1] > min(p[i], p[i+2])) && (p[i+1] > max(p[i], p[i+2]))) || p[i+1]==p[i] || p[i+1]==p[i+2])
             {
+                // cout << p[i] << " " << p[i+1] << " " << p[i+2] << endl;
                 p.erase(p.begin()+i+1); // erase element i+1
                 cuts++;
+                // cout << "cut1" << endl;
                 total_cuts++;
             }
             if(cuts==0)
@@ -38,10 +40,11 @@ namespace cF
         {
             cuts=0;
             i--;
-            if ((p[i+1] >= min(p[i], p[i+2])) || (p[i+1] >= max(p[i], p[i+2])))
+            if (((p[i+1] > min(p[i], p[i+2])) && (p[i+1] > max(p[i], p[i+2]))) || p[i+1]==p[i] || p[i+1]==p[i+2])
             {
                 p.erase(p.begin()+i+1); // erase element i+1
                 cuts++;
+                // cout << "cut2" << endl;
                 total_cuts++;
             }
         }
