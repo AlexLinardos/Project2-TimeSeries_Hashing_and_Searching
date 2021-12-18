@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <algorithm>
+#include "../includes/utils.hpp"
 
 namespace NNi
 {
@@ -65,6 +67,7 @@ namespace NNi
             }
         }
 
+
         /* Sets default value to corresponding command line parameter.
             Default value of parameter k changes according to algorithm.
             Prints error message on failure. */
@@ -111,7 +114,8 @@ namespace NNi
         {
             // first of all set the algorithm and the metric
             std::string algo = this->param_set.find("-algorithm")->second;
-            if ((algo != "LSH") && (algo != "Hypercube") && (algo != "Frechet"))
+            std::string algo_lc = lc(algo);
+            if ((algo_lc != "lsh") && (algo_lc != "hypercube") && (algo_lc != "frechet"))
             {
                 std::cout << "[INPUT ERROR] Algorithm " << algo << " is not recognisable." << std::endl;
                 return -1;
@@ -119,10 +123,11 @@ namespace NNi
             else
             {
                 this->algorithm = algo; // set algorithm value
-                if (algo == "Frechet")
+                if (algo_lc == "frechet")
                 {
                     std::string met = this->param_set.find("-metric")->second;
-                    if ((met != "discrete") && (met != "continuous"))
+                    std::string met_lc = lc(met);
+                    if ((met_lc != "discrete") && (met_lc != "continuous"))
                     {
                         std::cout << "[INPUT ERROR] Metric " << met << " is not recognisable." << std::endl;
                         return -1;
@@ -278,6 +283,7 @@ namespace NNi
                       << "-------------------------------------------" << std::endl;
         }
     };
+    
 }
 
 #endif

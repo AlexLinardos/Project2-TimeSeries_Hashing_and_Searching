@@ -59,8 +59,8 @@ Frechet or Mean Vector> –assignment <Classic or LSH or Hypercube or LSH_Freche
 
 __Examples :__
 
-1. `./search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm LSH`
-2. `./search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm Frechet -metric discrete -delta 2.0`
+1. `./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm LSH`
+2. `./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm Frechet -metric discrete -delta 2.0`
 3. και ενα για cluster
 
 ## In-depth Analysis

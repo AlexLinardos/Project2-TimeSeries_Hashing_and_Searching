@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
     NNi::NN_params params = NNi::NN_params(argc, argv);
     if (params.success == false)
     {
-        std::cout << "Something went wrong while reading command line parameters." << std::endl
+    	std::cout<<"-----------------------------------------------------------"<<std::endl
+         	<< "Something went wrong while reading command line parameters." << std::endl
                   << "Please make sure you follow the format bellow: " << std::endl
                   << "./bin/search -i <input file> -q <query file> -k <int> -L <int> -M <int> -probes "
                   << "<int> -o <output file> -algorithm <LSH or Hypercube or Frechet> -metric <discrete "
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
     double maf = 0.0;
     double f = 0.0;
 
-    if (params.algorithm == "LSH")
+    if (lc(params.algorithm) == "lsh")
     { // pass parameters to Cube_params class so we can use code from previous project
         LSH_params lsh_params;
         lsh_params.input_file = params.input_f;
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
         delete lsh;
     }
 
-    if (params.algorithm == "Hypercube")
+    if (lc(params.algorithm) == "hypercube")
     { // pass parameters to Cube_params class so we can use code from previous project
         Cube_params cube_params;
         cube_params.input_file = params.input_f;
@@ -183,7 +184,7 @@ int main(int argc, char *argv[])
         delete cube;
     }
 
-    if (params.algorithm == "Frechet")
+    if (lc(params.algorithm) == "frechet")
     {
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
 
@@ -211,7 +212,7 @@ int main(int argc, char *argv[])
             curves_queryset->push_back(curves::Curve2d((*queries)[i].id, t_dimension, (*queries)[i].xij));
         }
 
-        if (params.metric == "discrete")
+        if (lc(params.metric) == "discrete")
         {
             // perform LSH for discrete Frechet
             dFLSH::LSH *dLSH = new dFLSH::LSH(curves_dataset, params.L, 1.0, 15, 8);
@@ -267,7 +268,7 @@ int main(int argc, char *argv[])
 
             delete dLSH;
         }
-        else if (params.metric == "continuous")
+        else if (lc(params.metric) == "continuous")
         {
             filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2.0);
             filtered_curves_queryset = cF::filter_curves(*curves_queryset, 2.0);

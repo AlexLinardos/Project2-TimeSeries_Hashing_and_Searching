@@ -4,7 +4,9 @@ CXXFLAGS = -march=native -Ofast -static-libgcc -static-libstdc++ -std=c++14 -fpe
 
 all: search cluster
 
-search: search_main.o config.o curve.o frechet.o interval.o point.o simplification.o clean1
+search: final_search clean1
+
+final_search: search_main.o config.o curve.o frechet.o interval.o point.o simplification.o
 	$(CC) search_main.o config.o curve.o frechet.o interval.o point.o simplification.o -o bin/search $(CFLAGS)
 
 search_main.o: ./src/search_main.cpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp ./ui/NN_interface.hpp
@@ -28,11 +30,13 @@ point.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/point.cpp ./TimeSeries-ANN/Cont
 simplification.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
 	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp $(CFLAGS) $(CXXFLAGS)
 
-cluster: playground.o clean1
-	$(CC) playground.o -o bin/cluster $(CFLAGS)
+cluster: final_cluster clean1
 
-playground.o: ./ui/playground.cpp ./ui/Clustering_interface.hpp
-	$(CC) -c ./ui/playground.cpp $(CFLAGS) $(CXXFLAGS)
+final_cluster: cluster_main.o
+	$(CC) cluster_main.o -o bin/cluster $(CFLAGS)
+
+cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp
+	$(CC) -c ./src/cluster_main.cpp $(CFLAGS) $(CXXFLAGS)
 
 clean:
 	rm bin/*

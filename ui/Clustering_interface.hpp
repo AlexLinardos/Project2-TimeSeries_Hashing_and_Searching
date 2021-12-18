@@ -5,9 +5,10 @@
 #include <map>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include "../includes/utils.hpp"
 
-namespace Clusteri
+namespace Cli
 {
     // class to hold parameters of Clustering
     class Cluster_params
@@ -54,8 +55,9 @@ namespace Clusteri
                 return -2;
             }
         }
+        
 
-        // Sets parameter and confirms that all of the mandatory once have taken values.
+        // Sets parameter and confirms that all of the mandatory once have taken acceptable values.
         int set_and_confirm()
         {
             // iterate over map
@@ -67,9 +69,9 @@ namespace Clusteri
                 if (it->second == "none")
                 {
                     // handle optional
-                    if ((curr_key != "-complete") || (curr_key != "-silhouette"))
+                    if ((curr_key != "-complete") && (curr_key != "-silhouette"))
                     {
-                        std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
+                        std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << ". If you entered this parameter then make sure you didn't forget anything before that." << std::endl;
                         return -1;
                     }
                 }
@@ -80,21 +82,42 @@ namespace Clusteri
                 if (curr_key == "-o")
                     this->output_f = this->param_set.find("-o")->second;
                 if (curr_key == "-update")
+                {
                     this->update = this->param_set.find("-update")->second;
+                    std::string lc_update = lc(this->update);
+                    if ((lc_update != "mean frechet") && (lc_update != "mean vector"))
+                    {
+                    	std::cout<<"Value "<<this->update<<" is not acceptable for parameter -update. Please enter Mean Frechet or Mean Vector."<<std::endl;
+                    	return -1;
+                    }
+                }
                 if (curr_key == "-assignment")
+                {
                     this->assignment = this->param_set.find("-assignment")->second;
+                    std::string lc_assignment = lc(this->assignment);
+                    if ((lc_assignment != "classic") && (lc_assignment != "lsh") && (lc_assignment != "hypercube") && (lc_assignment != "lsh_frechet"))
+                    {
+                    	std::cout<<"Value "<<this->assignment<<" is not acceptable for parameter -assignment. Please enter Classic or LSH or Hypercube or LSH_Frechet."<<std::endl;
+                    	return -1;
+                    }
+                }
                 if (curr_key == "-complete")
                 {
                     if (this->param_set.find("-complete")->second != "none")
                         this->complete = true;
+                    else
+                    	this->complete = false;
                 }
                 if (curr_key == "-silhouette")
                 {
                     if (this->param_set.find("-silhouette")->second != "none")
                         this->silhouette = true;
+                    else
+                    	this->silhouette = false;
                 }
-                return 0;
+                it++;
             }
+            return 0;
         }
 
         // Reads parameter values from given configuration file
@@ -109,7 +132,8 @@ namespace Clusteri
             }
             else
             {
-                std::cout << "Error opening configuration file. " << this->conf_f << std::endl;
+                std::cout << "Error opening configuration file " << this->conf_f << std::endl;
+                return -1;
             }
 
             int line_count = 0;
@@ -187,13 +211,15 @@ namespace Clusteri
                     this->it = this->param_set.find(std::string(argv[i])); // try to find the parameter
                     if (this->it == this->param_set.end())                 // if NOT found in map
                     {
-                        // it must be a value, so the previous argument should be the parameter
+                        // it must be a value, so the previous argument should be the parameter or the word "Mean"
                         this->it2 = this->param_set.find(std::string(argv[i - 1]));
                         if (this->it2 == this->param_set.end()) // if not even the previous argument was an acceptable parameter
                         {
-                            std::cout << "[INPUT ERROR] Parameter " << argv[i] << " is not compatible." << std::endl;
-                            this->success = false;
-                            break; // stop reading
+                            if ((std::string(argv[i-1])!="Mean") && (std::string(argv[i-1])!="mean")){
+                            	std::cout << "[INPUT ERROR] Parameter " << std::string(argv[i]) << " is not compatible." << std::endl;
+                            	this->success = false;
+                            	break; // stop reading
+                            }
                         }
                     }
                     else // if found pass the corresponding value to the map
@@ -203,9 +229,30 @@ namespace Clusteri
                         {
                             this->it->second = "true";
                         }
+                        else if (this->it->first == "-update")
+                        {
+                        	try 
+                        	{
+                        		this->it->second = std::string(argv[i+1])+" "+std::string(argv[i+2]);
+                        	}
+                        	catch(...)
+                        	{
+                        		std::cout<<"[INPUT ERROR] Failed to find value of -update parameter."<<std::endl;
+                        		this->success = false;
+                        	}
+                        }
                         else
                         {
-                            this->it->second = std::string(argv[i + 1]);
+                        	try
+                        	{
+                        		this->it->second = std::string(argv[i + 1]);
+                        	}
+                        	catch(...)
+                        	{
+                        		std::cout<<"[INPUT ERROR] Failed to find value of -"<<std::string(argv[i])<<" parameter."<<std::endl;
+                        		this->success = false;
+                        	}
+                            
                         }
                     }
                 }

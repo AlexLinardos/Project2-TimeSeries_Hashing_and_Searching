@@ -208,4 +208,11 @@ double L2(double x1, double y1, double x2, double y2)
     return sqrt(dist);
 }
 
+// Converts string to lower case
+std::string lc(std::string data)
+{
+  std::transform(data.begin(), data.end(), data.begin(),[](unsigned char c){ return std::tolower(c); });
+  return data;
+}
+
 #endif
