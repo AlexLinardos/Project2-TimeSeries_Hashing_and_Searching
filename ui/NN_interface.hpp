@@ -67,7 +67,6 @@ namespace NNi
             }
         }
 
-
         /* Sets default value to corresponding command line parameter.
             Default value of parameter k changes according to algorithm.
             Prints error message on failure. */
@@ -283,7 +282,7 @@ namespace NNi
                       << "-------------------------------------------" << std::endl;
         }
     };
-    
+
 }
 
 #endif

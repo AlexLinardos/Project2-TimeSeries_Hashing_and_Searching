@@ -55,7 +55,6 @@ namespace Cli
                 return -2;
             }
         }
-        
 
         // Sets parameter and confirms that all of the mandatory once have taken acceptable values.
         int set_and_confirm()
@@ -87,8 +86,8 @@ namespace Cli
                     std::string lc_update = lc(this->update);
                     if ((lc_update != "mean frechet") && (lc_update != "mean vector"))
                     {
-                    	std::cout<<"Value "<<this->update<<" is not acceptable for parameter -update. Please enter Mean Frechet or Mean Vector."<<std::endl;
-                    	return -1;
+                        std::cout << "Value " << this->update << " is not acceptable for parameter -update. Please enter Mean Frechet or Mean Vector." << std::endl;
+                        return -1;
                     }
                 }
                 if (curr_key == "-assignment")
@@ -97,8 +96,8 @@ namespace Cli
                     std::string lc_assignment = lc(this->assignment);
                     if ((lc_assignment != "classic") && (lc_assignment != "lsh") && (lc_assignment != "hypercube") && (lc_assignment != "lsh_frechet"))
                     {
-                    	std::cout<<"Value "<<this->assignment<<" is not acceptable for parameter -assignment. Please enter Classic or LSH or Hypercube or LSH_Frechet."<<std::endl;
-                    	return -1;
+                        std::cout << "Value " << this->assignment << " is not acceptable for parameter -assignment. Please enter Classic or LSH or Hypercube or LSH_Frechet." << std::endl;
+                        return -1;
                     }
                 }
                 if (curr_key == "-complete")
@@ -106,14 +105,14 @@ namespace Cli
                     if (this->param_set.find("-complete")->second != "none")
                         this->complete = true;
                     else
-                    	this->complete = false;
+                        this->complete = false;
                 }
                 if (curr_key == "-silhouette")
                 {
                     if (this->param_set.find("-silhouette")->second != "none")
                         this->silhouette = true;
                     else
-                    	this->silhouette = false;
+                        this->silhouette = false;
                 }
                 it++;
             }
@@ -191,8 +190,8 @@ namespace Cli
         {
             if (argc == 1) // only for testing purposes
             {
-                this->input_f = "datasets/nasd_input.csv";
-                this->conf_f = "cluster.conf";
+                this->input_f = "../datasets/nasd_input.csv";
+                this->conf_f = "../cluster.conf";
                 this->output_f = "output.txt";
                 this->update = "Mean Frechet"; // Mean Frechet - Mean Vector
                 this->assignment = "Classic";  // Classic - LSH - Hypercube - LSH_Frechet
@@ -215,10 +214,11 @@ namespace Cli
                         this->it2 = this->param_set.find(std::string(argv[i - 1]));
                         if (this->it2 == this->param_set.end()) // if not even the previous argument was an acceptable parameter
                         {
-                            if ((std::string(argv[i-1])!="Mean") && (std::string(argv[i-1])!="mean")){
-                            	std::cout << "[INPUT ERROR] Parameter " << std::string(argv[i]) << " is not compatible." << std::endl;
-                            	this->success = false;
-                            	break; // stop reading
+                            if ((std::string(argv[i - 1]) != "Mean") && (std::string(argv[i - 1]) != "mean"))
+                            {
+                                std::cout << "[INPUT ERROR] Parameter " << std::string(argv[i]) << " is not compatible." << std::endl;
+                                this->success = false;
+                                break; // stop reading
                             }
                         }
                     }
@@ -231,28 +231,27 @@ namespace Cli
                         }
                         else if (this->it->first == "-update")
                         {
-                        	try 
-                        	{
-                        		this->it->second = std::string(argv[i+1])+" "+std::string(argv[i+2]);
-                        	}
-                        	catch(...)
-                        	{
-                        		std::cout<<"[INPUT ERROR] Failed to find value of -update parameter."<<std::endl;
-                        		this->success = false;
-                        	}
+                            try
+                            {
+                                this->it->second = std::string(argv[i + 1]) + " " + std::string(argv[i + 2]);
+                            }
+                            catch (...)
+                            {
+                                std::cout << "[INPUT ERROR] Failed to find value of -update parameter." << std::endl;
+                                this->success = false;
+                            }
                         }
                         else
                         {
-                        	try
-                        	{
-                        		this->it->second = std::string(argv[i + 1]);
-                        	}
-                        	catch(...)
-                        	{
-                        		std::cout<<"[INPUT ERROR] Failed to find value of -"<<std::string(argv[i])<<" parameter."<<std::endl;
-                        		this->success = false;
-                        	}
-                            
+                            try
+                            {
+                                this->it->second = std::string(argv[i + 1]);
+                            }
+                            catch (...)
+                            {
+                                std::cout << "[INPUT ERROR] Failed to find value of -" << std::string(argv[i]) << " parameter." << std::endl;
+                                this->success = false;
+                            }
                         }
                     }
                 }
