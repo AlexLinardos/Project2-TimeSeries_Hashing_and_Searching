@@ -36,6 +36,7 @@ namespace cF
         {
             Point point(1);
             point.set(0, (coordinate_t)curve.data[i].x);
+            // point.set(1, (coordinate_t)curve.data[i].y);
 
             Point point2(1);
             point2.set(0, (coordinate_t)curve.data[i].y);
@@ -66,8 +67,6 @@ namespace cF
 
         // we will store current nearest neighbour in curr_NN along with its distance from query
         vector<double> dummy_vec;
-        for (int i = 0; i < size; i++)
-            dummy_vec.push_back(0.0);
         curves::Curve2d null_curve = curves::Curve2d("null", dummy_vec, dummy_vec);
         std::pair<curves::Curve2d *, double> curr_NN;
         curr_NN.first = &null_curve;
