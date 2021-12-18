@@ -30,10 +30,6 @@ int main(int argc, char *argv[])
     vector<Item> *queries = new vector<Item>;
     read_items(queries, params.query_f);
 
-    std::vector<std::pair<double, Item *>> knns;
-    std::vector<std::pair<double, Item *>> true_knns;
-    std::vector<std::pair<double, Item *>> r;
-
     std::chrono::steady_clock::time_point lsh_begin;
     std::chrono::steady_clock::time_point true_begin;
 
@@ -52,6 +48,9 @@ int main(int argc, char *argv[])
         lsh_params.L = params.L;
         lsh_params.out_file = params.output_f;
         lsh_params.N=1;
+
+        std::vector<std::pair<double, Item *>> knns;
+        std::vector<std::pair<double, Item *>> true_knns;
 
         std::cout << "------[LSH]------" << std::endl;
 
@@ -121,6 +120,9 @@ int main(int argc, char *argv[])
         cube_params.probes = params.probes;
         cube_params.out_file = params.output_f;
         cube_params.N=1;
+
+        std::vector<std::pair<double, Item *>> knns;
+        std::vector<std::pair<double, Item *>> true_knns;
 
         std::cout << "------[Hypercube]------" << std::endl;
 
