@@ -26,7 +26,7 @@ namespace NNi
         std::map<std::string, std::string>::iterator it; // map iterator
 
         /* Makes sure the value of a given parameter can be converted to int and sets it.
-            On a failure it sets the value to default. */
+            On a failure it marks the value as "none" so as to be set to default later if able. */
         void try_stoi(std::string param)
         {
             try
@@ -227,7 +227,7 @@ namespace NNi
                 this->probes = 0;
                 this->output_f = "outputs/output.txt";
                 this->algorithm = "Frechet"; // LSH - Hypercube - Frechet
-                this->metric = "discrete";       // discrete - continuous
+                this->metric = "discrete";   // discrete - continuous
                 this->delta = 0.0;
             }
             else if (argc % 2 == 1) // normal run
