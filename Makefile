@@ -44,3 +44,6 @@ clean:
 
 clean1:
 	rm *.o
+
+clean_bin:
+	rm bin/*

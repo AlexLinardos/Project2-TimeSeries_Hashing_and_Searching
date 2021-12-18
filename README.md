@@ -7,10 +7,16 @@
 
 Github repository: https://github.com/AlexLinardos/Project2-TimeSeries_Hashing_and_Searching
 
+## Table of contents
+* [Repository organisation](#repository-organisation)
+* [Compilation and execution instructions](#compilation-and-execution-instructions)
+* [In-depth Analysis](#in-depth-analysis)
+* [Final thoughts](#final-thoughts)
+
 ## Repository organisation
 ### General
 * __Makefile :__ Used to compile the programs with `make` command.
-* __cluster.conf :__ Contains configuration parameters for clustering.
+* __cluster.conf :__ Contains configuration parameters for clustering. When changing the values make sure you *__leave a space before and after the given value__*.
 * __bin/ :__ Binary files are placed in this directory.
 * __datasets/ :__ This directory contains the datasets used as input or as queries during the implementation.
 * __outputs/ :__ This directory contains output files with the results of some program runs.
@@ -26,24 +32,38 @@ Github repository: https://github.com/AlexLinardos/Project2-TimeSeries_Hashing_a
 ## Compilation and execution instructions
 ### Compilation options
 * To compile the code for ANN search: `make search`
-* To compile the code for Clustering: `make cluster`
-To delete all the files in the bin directory use `make clean`
+* To compile the code for Clustering: `make cluster` 
+<br>To delete all the files in both the "bin" and the "outputs" directories use `make clean`
+<br>To delete all the files in the "bin" directory use `make clean_bin`
 
 ### Execution options
-Please note that the parameters below noted with [M] are mandatory, while parameter "metric" noted with [M*] is mandatory only if LSH for curves (Frechet) algorithm option is selected. Non-mandatory paramateres will be set to default value if not given.
+Please note that the parameters below noted with [__M__] are mandatory, while parameter "metric" noted with [__M*__] is mandatory only if LSH for curves (Frechet) algorithm option is selected. Non-mandatory paramateres will be set to default value if not given.
 * To run ANN you are going to need the following parameters:
-  1. input file[M] : the path to the input file (a dataset of curves), e.g. ../datasets/nasd_input.csv
-  2. query file[M] : the path to the query file (a dataset of curves), e.g. ../datasets/nasd_query.csv
-  3. k : the number of LSH hash functions to be used OR the dimensions of vectors d' for the projection on hypercube (dependent on algorithm)
+  1. input file[__M__] : the path to the input file (a dataset of curves), e.g. ../datasets/nasd_input.csv
+  2. query file[__M__] : the path to the query file (a dataset of curves), e.g. ../datasets/nasd_query.csv
+  3. k : the number of LSH hash functions to be used OR the dimensions of vectors (aka d') for the projection on hypercube (dependent on algorithm)
   4. L : the number of LSH hash tables
   5. M : the maximum number of vectors to be checked while using Hypercube projection algorithm
   6. probes : the maximum number of hypercube vertices to be checked
-  7. output file[M] : the path to the file in which the results of the program will be written
-  8. algorithm[M] : algorithm to be used for this run (LSH, Hypercube or LSH Frechet)
-  9. metric[M*] : type of Frechet distance to be used if LSH for curves (LSH Frechet) algorithm is selected (discrete or continuous)
+  7. output file[__M__] : the path to the file in which the results of the program will be written
+  8. algorithm[__M__] : algorithm to be used for this run (LSH, Hypercube or LSH Frechet)
+  9. metric[__M*__] : type of Frechet distance to be used if LSH for curves (LSH Frechet) algorithm is selected (discrete or continuous)
   10. delta : the size of the grid used in LSH for curves (LSH Frechet) algorithm
 * To run Clustering you are going to need the following parameters:
-  1. input file : the path to the input file (a dataset of curves), e.g. ./datasets/nasd_input.csv
+  1. input file[__M__] : the path to the input file (a dataset of curves), e.g. ./datasets/nasd_input.csv
+  2. configuration file[__M__] : the path to the configuration (.conf) file, e.g. ./cluster.conf <br>
+      A configuration file should include the following parameters and in this exact order:
+      * number_of_clusters[__M__] : number of clusters to be created (aka K of K-medians)
+      * number_of_vector_hash_tables : the number of LSH hash tables
+      * number_of_vector_hash_functions : the number of LSH hash functions to be used
+      * max_number_M_of_hypercube : the maximum number of vectors to be checked
+      * number_of_hypercube_dimensions : the dimensions of vectors (aka d') for the projection on hypercube
+      * number_of_probes : the maximum number of hypercube vertices to be checked
+  3. output file[__M__] : the path to the file in which the results of the program will be written
+  4. update[__M__] : method to be used during the update step of clustering (Mean Frechet or Mean Vector)
+  5. assignment[M] : method to be used during the assignment step of clustering (Classic, LSH, Hypercube or LSH_Frechet)
+  6. complete: if given, prints clusters in detail in the output
+  7. silhouette: if given, prints silhouette in the output
 
 To execute the __ANN search__ program follow this format:
 
@@ -61,7 +81,8 @@ __Examples :__
 
 1. `./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm LSH`
 2. `./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm Frechet -metric discrete -delta 2.0`
-3. και ενα για cluster
+3. `./bin/cluster -i datasets/nasd_input.csv -c cluster.conf -o outputs/output.txt -update Mean Vector -assignment Classic`
+4. `./bin/cluster -i datasets/nasd_input.csv -c cluster.conf -o outputs/output.txt -update Mean Frechet -assignment LSH_Frechet -complete -silhouette`
 
 ## In-depth Analysis
 In this section we will analyse our code file-by-file and talk about any possible implementation decisions taken during development.
@@ -86,7 +107,7 @@ In this section we will analyse our code file-by-file and talk about any possibl
 
 ### ui/
   1. __NN_interface.hpp__: This header file contains the class NN_params. After construction, an object of this class has all the necessary attributes and methods to implement a fully-fledged command line interface for the ANN search program that includes methods for reading a command, checking if it is valid, finding parameters, confirming that their values are acceptable, storing them and passing default values into possible non-mandatory parameters that were not given. After its construction, all parameters needed for the ANN search algorithm will be stored in its attributes.
-  2. __Clustering_interface.hpp__: ... 
+  2. __Clustering_interface.hpp__: This header file contains the class Cluster_params. After construction, an object of this class has all the necessary attributes and methods to implement a fully-fledged command line interface for the Clustering program that includes methods for reading a command, checking if it is valid, finding parameters, confirming that their values are acceptable, storing them and passing default values into possible non-mandatory parameters that were not given. After its construction, all parameters needed for the ANN search algorithm will be stored in its attributes.
 
 ### includes/
   1. __curves.hpp__: This header file contains a class that is used throughout our code to make it more intuitive. That is the Curve2d class. It helps us create objects that *__simulate curves in the 2-dimensional space__* by having an id and a vector of 2-dimensional points. The 2-dimensional points are constructed by the class just above, named Point2d. This is again a very simple class that is there only to make the rest of our code more intuitive. Finally, the point2d_L2() function calculates the euclidean distance between two of those points.
@@ -94,3 +115,5 @@ In this section we will analyse our code file-by-file and talk about any possibl
   __Notable implementation decisions__:
   * The algorithm to compute the optimal traversal returns it in reverse (because vectors do not and should not have a way to push an element to the front). We decided not to reverse the returned traversal in order to not add additional computational weight to the program.
   * εδώ για το mean_of_curves
+
+## Final thoughts
