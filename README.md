@@ -1,5 +1,5 @@
 # Project2 - Nearest Neighbour and Clustering for time series
-### In this project we implement algorithms in C++ to perform Approximate Nearest Neighbour search and Clustering on datasets containing data series. For the implementation we experiment and use methods such as Locality Sensitive Hashing and Projection on Hypercube, as well as different distance metrics such as L2, Discrete Frechet and Continuous Frechet.
+### In this project we implement algorithms in C++ to perform Approximate Nearest Neighbour search and Clustering on datasets containing time series. For the implementation we experiment and use methods such as Locality Sensitive Hashing and Projection on Hypercube, as well as different distance metrics such as L2, Discrete Frechet and Continuous Frechet.
 
 ## Team members:
 * Λινάρδος Αλέξανδρος - sdi1600093
