@@ -35,7 +35,7 @@ cluster: final_cluster clean1
 final_cluster: cluster_main.o
 	$(CC) cluster_main.o -o bin/cluster $(CFLAGS)
 
-cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp
+cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp ./TimeSeries-Clustering/initialization.hpp
 	$(CC) -c ./src/cluster_main.cpp $(CFLAGS) $(CXXFLAGS)
 
 clean:

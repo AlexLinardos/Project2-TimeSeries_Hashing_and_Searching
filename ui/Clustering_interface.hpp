@@ -115,6 +115,26 @@ namespace Cli
                         this->silhouette = false;
                 }
                 it++;
+
+                // finally, confirm that given -assignment and -update are compatible
+                if (lc(this->update) == "mean vector")
+                {
+                    if (lc(this->assignment) == "lsh_frechet")
+                    {
+                        std::cout << "Mean Vector assignment method is not compatible with LSH_Frechet assignment method." << std::endl
+                                  << "Please pick an assignment method between Classic, LSH and Hypercube." << std::endl;
+                        return -1;
+                    }
+                }
+                if (lc(this->update) == "mean frechet")
+                {
+                    if ((lc(this->assignment) == "lsh") || (lc(this->assignment) == "hypercube"))
+                    {
+                        std::cout << "Mean Frechet assignment method is not compatible with neither LSH nor Hypercube assignment methods." << std::endl
+                                  << "Please pick an assignment method between Classic and LSH_Frechet." << std::endl;
+                        return -1;
+                    }
+                }
             }
             return 0;
         }
