@@ -158,8 +158,7 @@ namespace cFLSH
         int L; // number of hash tables
         double delta;
         int tableSize;
-        int datasize;
-        int windowSize;                        // size of each table
+        int datasize;                      // size of each table
         vector<vector<double>> h_curves;       // stores grid-curves after snapping and minima_maxima
         vector<vector<double>> x_vecs;         // stores real vectors x (after padding)
         std::vector<Association> **hashTables; // Association* hashTables;
@@ -168,7 +167,7 @@ namespace cFLSH
         G *g_family;
 
     public:
-        LSH(vector<curves::Curve2d> *dataset, int L, double delta, int factor_for_windowSize, int divisor_for_tableSize) : dataset(dataset),
+        LSH(vector<curves::Curve2d> *dataset, int L, double delta, int divisor_for_tableSize) : dataset(dataset),
                                                                                                                            L(L),
                                                                                                                            delta(delta),
                                                                                                                            tableSize(dataset->size() / divisor_for_tableSize),
@@ -194,10 +193,9 @@ namespace cFLSH
                 distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
                 // distance += (cF::c_distance((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
             }
-            windowSize = factor_for_windowSize * (int)distance;
-            std::cout << "windowSize :" << windowSize << std::endl;
 
-            this->g_family = new G(4, this->tableSize, this->windowSize, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
+            this->g_family = new G(4, this->tableSize, distance, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
+            
             // Initialize L hashTables, Grids(shifted_deltas)
             hashTables = new std::vector<Association> *[L];
             t = new double[L];
@@ -309,7 +307,7 @@ namespace cFLSH
         }
 
         // searches for the approximate nearest neighbour of the query curve
-        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, int threshold = 0)
+        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, bool querying_trick, int threshold = 0)
         {
             int starting_size = query.data.size();
 
@@ -350,6 +348,23 @@ namespace cFLSH
                 long unsigned hval = (*this->g_family).produce_g(*item_for_g);
                 long unsigned bucket = hval % (long unsigned)this->tableSize;
                 delete item_for_g; // we don't need it anymore
+
+                // querying trick, if curve with identical grid_curve exists in bucket, return it as the ann
+                if(querying_trick==true)
+                {
+                    // for each item in the bucket
+                    for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
+                    {
+                        if (identical_curves(h_curves.back(), *(this->hashTables[i][bucket][j].grid_curve)))
+                        {
+                            // replace curr_NN
+                            curr_NN.first = this->hashTables[i][bucket][j].curve;
+                            curr_NN.second = cF::c_distance(*(this->hashTables[i][bucket][j].curve), query);
+                            cout << "QUERYING TRICK returned ann for " << query.id << endl;
+                            return curr_NN;
+                        }
+                    }
+                }
 
                 // for each item in the bucket
                 for (int j = 0; j < this->hashTables[i][bucket].size(); j++)

@@ -95,7 +95,7 @@ class LSH
     G **g;
 
 public:
-    LSH(const LSH_params &params, vector<Item> &dataset, int factor_for_windowSize, int divisor_for_tableSize) : params(params)
+    LSH(const LSH_params &params, vector<Item> &dataset, double factor_for_windowSize, int divisor_for_tableSize) : params(params)
     {
         // tune windowSize
         tableSize = dataset.size() / divisor_for_tableSize;
@@ -120,7 +120,7 @@ public:
             distance += (EuclideanDistance(&dataset[item_index_1], &dataset[item_index_2], dimension)) / (double)(dataset.size() / 4);
         }
 
-        windowSize = factor_for_windowSize * (int)distance;
+        windowSize = (int)floor(factor_for_windowSize * distance);
         // cout << "w " << w << endl;
 
         // Initialize L hashTables and g_hashFunctions

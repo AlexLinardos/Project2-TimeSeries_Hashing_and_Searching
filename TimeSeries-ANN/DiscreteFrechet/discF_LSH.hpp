@@ -34,9 +34,9 @@ namespace dFLSH
         vector<curves::Curve2d> *dataset;
         int L; // number of hash tables
         double delta;
-        int tableSize;
+        int tableSize; // size of each table
         int datasize;
-        int windowSize;                           // size of each table
+        // int windowSize;                         
         vector<vector<curves::Point2d>> h_curves; // stores grid-curves
         vector<vector<double>> x_vecs;            // stores real vectors x
         std::vector<Association> **hashTables;    // Association* hashTables;
@@ -45,7 +45,7 @@ namespace dFLSH
         G *g_family;                              // G hash family that is gonna be used for storing in 1d table
 
     public:
-        LSH(vector<curves::Curve2d> *dataset, int L, double delta, int factor_for_windowSize, int divisor_for_tableSize) : dataset(dataset),
+        LSH(vector<curves::Curve2d> *dataset, int L, double delta, int divisor_for_tableSize, bool querying_trick = false) : dataset(dataset),
                                                                                                                            L(L),
                                                                                                                            delta(delta),
                                                                                                                            shifts(L),
@@ -60,9 +60,9 @@ namespace dFLSH
             int item_index_1;
             int item_index_2;
             double distance = 0;
-            /* For dataset->size()/4 samples we randomly choose two points of the dataset and calculate their Euclidean distance.
+            /* For dataset->size()/4 samples we randomly choose two curves of the dataset and calculate their discrete frechet distance.
                 We sum these disances and calculate the average. Then we multiply that average distance by a factor of our choice and we
-                get the windowsize. That factor can be adjusted at LSH.cpp at the initialization of the LSH instance */
+                get the windowsize. That factor can be adjusted at search_main.cpp at the initialization of the LSH instance */
             for (int i = 0; i < dataset->size() / 4; i++)
             {
                 item_index_1 = uni(rng);
@@ -71,10 +71,11 @@ namespace dFLSH
                     item_index_2 = uni(rng);
                 distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
             }
-            this->windowSize = factor_for_windowSize * (int)distance;
-            std::cout << "windowSize :" << this->windowSize << std::endl;
+            // this->windowSize = (int)floor(factor_for_windowSize * distance);
+            // std::cout << "windowSize: " << this->windowSize << std::endl;
 
-            this->g_family = new G(4, this->tableSize, this->windowSize, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
+            this->g_family = new G(4, this->tableSize, distance, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
+
             // Initialize L hashTables, Grids(shifted_deltas)
             hashTables = new std::vector<Association> *[L];
             for (int i = 0; i < L; i++) // for every hashTable
@@ -194,7 +195,7 @@ namespace dFLSH
         }
 
         // searches for the approximate nearest neighbour of the query curve
-        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, int threshold = 0)
+        std::pair<curves::Curve2d *, double> search_ANN(curves::Curve2d &query, bool querying_trick, int threshold = 0)
         {
             int starting_size = query.data.size();
 
@@ -237,6 +238,33 @@ namespace dFLSH
                 long unsigned bucket = id % (long unsigned)this->tableSize;
 
                 delete item_for_g; // we don't need it anymore
+
+                // querying trick, check only curves with identical grid_curves
+                int found = 0;
+                if(querying_trick==true)
+                {
+                    // for each item in the bucket
+                    for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
+                    {
+                        if (identical_curves(h_curves.back(), *(this->hashTables[i][bucket][j].grid_curve)))
+                        {
+                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query)[this->hashTables[i][bucket][j].curve->data.size() - 1][query.data.size() - 1];
+                            // if nearer curve is found
+                            if (dfd < curr_NN.second)
+                            {
+                                // replace curr_NN
+                                curr_NN.first = this->hashTables[i][bucket][j].curve;
+                                curr_NN.second = dfd;
+                            }
+                            
+                            cout << "QUERYING TRICK returned ann for " << query.id << endl;
+                            found = 1;    
+                        }
+                    }
+                    if(found==1)
+                        return curr_NN;
+                }
+
 
                 // for each item in the bucket
                 for (int j = 0; j < this->hashTables[i][bucket].size(); j++)

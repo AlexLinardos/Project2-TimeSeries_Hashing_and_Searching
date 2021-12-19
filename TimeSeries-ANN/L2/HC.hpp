@@ -71,7 +71,7 @@ public:
     std::vector<Item *> *hash_table;
     F f;
 
-    Hypercube(const Cube_params &params, vector<Item> &dataset, int factor_for_windowSize, vector<unordered_map<int, int>> &h_maps) : f(params.k)
+    Hypercube(const Cube_params &params, vector<Item> &dataset, double factor_for_windowSize, vector<unordered_map<int, int>> &h_maps) : f(params.k)
     {
         d = dataset[0].xij.size();
         std::random_device rd;                                         // only used once to initialise (seed) engine
@@ -92,7 +92,7 @@ public:
             distance += EuclideanDistance(&dataset[item_index_1], &dataset[item_index_2], d) / length;
         }
 
-        w = factor_for_windowSize * distance;
+        w = (int)floor(factor_for_windowSize * distance);
 
         this->k = params.k;
         this->M = params.M;
