@@ -194,6 +194,10 @@ namespace NNi
                         this->set_default(curr_key, algo);
                         std::cout << "Parameter " << curr_key << " has been set to default value." << std::endl;
                     }
+                    else if (curr_key == "-delta")
+                    {
+                        this->param_set.find("-delta")->second = "0.0";
+                    }
                     else
                     {
                         std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
