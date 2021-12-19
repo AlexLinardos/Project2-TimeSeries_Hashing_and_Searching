@@ -190,7 +190,7 @@ namespace cFLSH
                 item_index_2 = uni(rng);
                 while (item_index_1 == item_index_2)
                     item_index_2 = uni(rng);
-                distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
+                distance += dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2]) / (double)(dataset->size() / 4);
                 // distance += (cF::c_distance((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
             }
 
