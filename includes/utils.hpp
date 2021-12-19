@@ -132,27 +132,6 @@ bool comparePairs(const std::pair<double, Item *> &x, const std::pair<double, It
     return (x.first < y.first);
 }
 
-// used to read data from config file
-int extract_int_from_string(const string &str)
-{
-    stringstream ss;
-    ss << str;
-    string word;
-    int temp_int;
-
-    while (!ss.eof())
-    {
-        ss >> word;
-        if (stringstream(word) >> temp_int)
-        {
-            ss.str(string());
-            return temp_int;
-        }
-    }
-    ss.str(string());
-    return -1;
-}
-
 // used for testing purposes
 template <typename K, typename V>
 void print_map(std::unordered_map<K, V> const &m)
@@ -227,6 +206,14 @@ double L2(double x1, double y1, double x2, double y2)
 {
     double dist = pow((x1 - x2), 2) + pow((y1 - y2), 2);
     return sqrt(dist);
+}
+
+// Converts string to lower case
+std::string lc(std::string data)
+{
+    std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c)
+                   { return tolower(c); });
+    return data;
 }
 
 #endif

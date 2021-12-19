@@ -2,9 +2,11 @@ CC=g++
 CFLAGS=-O3
 CXXFLAGS = -march=native -Ofast -static-libgcc -static-libstdc++ -std=c++14 -fpermissive -fPIC -ffast-math -fno-trapping-math -ftree-vectorize
 
-all: search clean1
+all: search cluster
 
-search: search_main.o config.o curve.o frechet.o interval.o point.o simplification.o
+search: final_search clean1
+
+final_search: search_main.o config.o curve.o frechet.o interval.o point.o simplification.o
 	$(CC) search_main.o config.o curve.o frechet.o interval.o point.o simplification.o -o bin/search $(CFLAGS)
 
 search_main.o: ./src/search_main.cpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp ./ui/NN_interface.hpp
@@ -28,9 +30,20 @@ point.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/point.cpp ./TimeSeries-ANN/Cont
 simplification.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.hpp ./TimeSeries-ANN/ContinuousFrechet/Fred/types.hpp
 	$(CC) -c ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp $(CFLAGS) $(CXXFLAGS)
 
+cluster: final_cluster clean1
+
+final_cluster: cluster_main.o
+	$(CC) cluster_main.o -o bin/cluster $(CFLAGS)
+
+cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp ./TimeSeries-Clustering/initialization.hpp
+	$(CC) -c ./src/cluster_main.cpp $(CFLAGS) $(CXXFLAGS)
+
 clean:
 	rm bin/*
 	rm outputs/*
 
 clean1:
 	rm *.o
+
+clean_bin:
+	rm bin/*

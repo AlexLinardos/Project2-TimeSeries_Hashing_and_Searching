@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
     NNi::NN_params params = NNi::NN_params(argc, argv);
     if (params.success == false)
     {
-        std::cout << "Something went wrong while reading command line parameters." << std::endl
+        std::cout << "-----------------------------------------------------------" << std::endl
+                  << "Something went wrong while reading command line parameters." << std::endl
                   << "Please make sure you follow the format bellow: " << std::endl
                   << "./bin/search -i <input file> -q <query file> -k <int> -L <int> -M <int> -probes "
                   << "<int> -o <output file> -algorithm <LSH or Hypercube or Frechet> -metric <discrete "
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
     double maf = 0.0;
     double f = 0.0;
 
-    if (params.algorithm == "LSH") // ideal is L=1, k=1, tablesize=datasetsize/2, w = average L2 distance between dataset curves (as vectors)
+    if (lc(params.algorithm) == "lsh") // ideal is L=1, k=1, tablesize=datasetsize/2, w = average L2 distance between dataset curves (as vectors)
     { // pass parameters to Cube_params class so we can use code from previous project
         LSH_params lsh_params;
         lsh_params.input_file = params.input_f;
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
         lsh_params.k = params.k;
         lsh_params.L = params.L;
         lsh_params.out_file = params.output_f;
-        lsh_params.N=1;
+        lsh_params.N = 1;
 
         // lsh_params.k = 1;
         // lsh_params.L = 1; 
@@ -60,11 +61,12 @@ int main(int argc, char *argv[])
         LSH *lsh = new LSH(lsh_params, *dataset, 1, 2);
 
         std::cout << "Searching for the approximate nearest neighbors of the query curves..." << std::endl;
-        
+
         ofstream output_file;
         output_file.open(params.output_f);
 
-        output_file << "Algorithm:  LSH_Vector" << endl << endl;
+        output_file << "Algorithm:  LSH_Vector" << endl
+                    << endl;
         for (int i = 0; i < queries->size(); i++)
         {
             output_file << "Query: " << (*queries)[i].id << endl;
@@ -83,7 +85,8 @@ int main(int argc, char *argv[])
 
             if (knns[0].second->null == true)
             {
-                output_file << "Approximate Nearest neighbor " << "NOT FOUND" << endl;
+                output_file << "Approximate Nearest neighbor "
+                            << "NOT FOUND" << endl;
                 continue;
             }
             output_file << "Approximate Nearest neighbor: " << knns[0].second->id << endl;
@@ -96,11 +99,12 @@ int main(int argc, char *argv[])
 
             // υπολογίζουμε dist(approx NN) / dist(true NN) για κάθε query και κρατάμε το max όλων
             f = knns[0].first / true_knns[0].first;
-            if(f > maf)
+            if (f > maf)
                 maf = f;
-            output_file << endl; 
+            output_file << endl;
         }
-        output_file << endl << "tApproximateAverage: " << lsh_elapsed / (double)queries->size() << " (μs)" << endl;
+        output_file << endl
+                    << "tApproximateAverage: " << lsh_elapsed / (double)queries->size() << " (μs)" << endl;
         output_file << "tTrueAverage: " << brute_elapsed / (double)queries->size() << " (μs)" << endl;
         output_file << "MAF: " << maf << endl;
 
@@ -113,7 +117,7 @@ int main(int argc, char *argv[])
         delete lsh;
     }
 
-    if (params.algorithm == "Hypercube") // ideal is k=1. M=30, probes=1, w = average L2 distance between dataset curves (as vectors)
+    if (lc(params.algorithm) == "hypercube") // ideal is k=1. M=30, probes=1, w = average L2 distance between dataset curves (as vectors)
     { // pass parameters to Cube_params class so we can use code from previous project
         Cube_params cube_params;
         cube_params.input_file = params.input_f;
@@ -122,7 +126,7 @@ int main(int argc, char *argv[])
         cube_params.M = params.M;
         cube_params.probes = params.probes;
         cube_params.out_file = params.output_f;
-        cube_params.N=1;
+        cube_params.N = 1;
 
         cube_params.k = 1;
         cube_params.M = 30;
@@ -137,11 +141,12 @@ int main(int argc, char *argv[])
         Hypercube *cube = new Hypercube(cube_params, *dataset, 1, f_map.h_maps);
 
         std::cout << "Searching for the approximate nearest neighbors of the query curves..." << std::endl;
-        
+
         ofstream output_file;
         output_file.open(params.output_f);
 
-        output_file << "Algorithm:  Hypercube" << endl << endl;
+        output_file << "Algorithm:  Hypercube" << endl
+                    << endl;
         for (int i = 0; i < queries->size(); i++)
         {
             output_file << "Query: " << (*queries)[i].id << endl;
@@ -160,7 +165,8 @@ int main(int argc, char *argv[])
 
             if (knns[0].second->null == true)
             {
-                output_file << "Approximate Nearest neighbor " << "NOT FOUND" << endl;
+                output_file << "Approximate Nearest neighbor "
+                            << "NOT FOUND" << endl;
                 continue;
             }
             output_file << "Approximate Nearest neighbor: " << knns[0].second->id << endl;
@@ -173,12 +179,15 @@ int main(int argc, char *argv[])
 
             // υπολογίζουμε dist(approx NN) / dist(true NN) για κάθε query και κρατάμε το max όλων
             f = knns[0].first / true_knns[0].first;
-            if(f > maf)
+            if (f > maf)
                 maf = f;
-            output_file << endl; 
+            output_file << endl;
         }
-        output_file << endl << "tApproximateAverage: " << lsh_elapsed / (double)queries->size() << " (μs)" << endl;;
-        output_file << "tTrueAverage: " << brute_elapsed / (double)queries->size() << " (μs)" << endl;;
+        output_file << endl
+                    << "tApproximateAverage: " << lsh_elapsed / (double)queries->size() << " (μs)" << endl;
+        ;
+        output_file << "tTrueAverage: " << brute_elapsed / (double)queries->size() << " (μs)" << endl;
+        ;
         output_file << "MAF: " << maf << endl;
 
         cout << "[EVALUATION]" << endl;
@@ -190,7 +199,7 @@ int main(int argc, char *argv[])
         delete cube;
     }
 
-    if (params.algorithm == "Frechet")
+    if (lc(params.algorithm) == "frechet")
     {
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
 
@@ -223,7 +232,7 @@ int main(int argc, char *argv[])
             params.delta = delta_tuning(*curves_dataset);
         }
 
-        if (params.metric == "discrete") // L = 6, delta = avg dist between curve vertices, tablesize = dataset_size/8, threshold = dataset_size/4, querying trick = false
+        if (lc(params.metric) == "discrete") // L = 6, delta = avg dist between curve vertices, tablesize = dataset_size/8, threshold = dataset_size/4, querying trick = false
         {
             // perform LSH for discrete Frechet
 
@@ -233,7 +242,8 @@ int main(int argc, char *argv[])
             ofstream output_file;
             output_file.open(params.output_f);
 
-            output_file << "Algorithm: LSH_Frechet_Discrete" << endl << endl;
+            output_file << "Algorithm: LSH_Frechet_Discrete" << endl
+                        << endl;
             for (int i = 0; i < curves_queryset->size(); i++)
             {
                 output_file << "Query: " << (*curves_queryset)[i].id << endl;
@@ -251,7 +261,8 @@ int main(int argc, char *argv[])
 
                 if (ann.first->id == "null")
                 {
-                    output_file << "Approximate Nearest neighbor " << "NOT FOUND" << endl;
+                    output_file << "Approximate Nearest neighbor "
+                                << "NOT FOUND" << endl;
                     continue;
                 }
                 output_file << "Approximate Nearest neighbor: " << ann.first->id << endl;
@@ -264,11 +275,12 @@ int main(int argc, char *argv[])
 
                 // υπολογίζουμε dist(approx NN) / dist(true NN) για κάθε query και κρατάμε το max όλων
                 f = ann.second / true_nn.second;
-                if(f > maf)
+                if (f > maf)
                     maf = f;
-                output_file << endl; 
+                output_file << endl;
             }
-            output_file << endl << "tApproximateAverage: " << lsh_elapsed / (double)queries->size() << " (sec)" << endl;
+            output_file << endl
+                        << "tApproximateAverage: " << lsh_elapsed / (double)queries->size() << " (sec)" << endl;
             output_file << "tTrueAverage: " << brute_elapsed / (double)queries->size() << " (sec)" << endl;
             output_file << "MAF: " << maf << endl;
 
@@ -280,7 +292,7 @@ int main(int argc, char *argv[])
 
             delete dLSH;
         }
-        else if (params.metric == "continuous")
+        else if (lc(params.metric) == "continuous")
         {
             filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2*params.delta);
             filtered_curves_queryset = cF::filter_curves(*curves_queryset, 2*params.delta);
@@ -292,7 +304,8 @@ int main(int argc, char *argv[])
             ofstream output_file;
             output_file.open(params.output_f);
 
-            output_file << "Algorithm: LSH_Frechet_Continuous" << endl << endl;
+            output_file << "Algorithm: LSH_Frechet_Continuous" << endl
+                        << endl;
             for (int i = 0; i < filtered_curves_queryset->size(); i++)
             {
                 output_file << "Query: " << (*curves_queryset)[i].id << endl;
@@ -311,7 +324,8 @@ int main(int argc, char *argv[])
 
                 if (ann.first->id == "null")
                 {
-                    output_file << "Approximate Nearest neighbor " << "NOT FOUND" << endl;
+                    output_file << "Approximate Nearest neighbor "
+                                << "NOT FOUND" << endl;
                     continue;
                 }
                 output_file << "Approximate Nearest neighbor: " << ann.first->id << endl;

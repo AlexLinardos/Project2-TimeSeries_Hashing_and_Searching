@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <algorithm>
+#include "../includes/utils.hpp"
 
 namespace NNi
 {
@@ -26,7 +28,7 @@ namespace NNi
         std::map<std::string, std::string>::iterator it; // map iterator
 
         /* Makes sure the value of a given parameter can be converted to int and sets it.
-            On a failure it sets the value to default. */
+            On a failure it marks the value as "none" so as to be set to default later if able. */
         void try_stoi(std::string param)
         {
             try
@@ -111,7 +113,8 @@ namespace NNi
         {
             // first of all set the algorithm and the metric
             std::string algo = this->param_set.find("-algorithm")->second;
-            if ((algo != "LSH") && (algo != "Hypercube") && (algo != "Frechet"))
+            std::string algo_lc = lc(algo);
+            if ((algo_lc != "lsh") && (algo_lc != "hypercube") && (algo_lc != "frechet"))
             {
                 std::cout << "[INPUT ERROR] Algorithm " << algo << " is not recognisable." << std::endl;
                 return -1;
@@ -119,10 +122,11 @@ namespace NNi
             else
             {
                 this->algorithm = algo; // set algorithm value
-                if (algo == "Frechet")
+                if (algo_lc == "frechet")
                 {
                     std::string met = this->param_set.find("-metric")->second;
-                    if ((met != "discrete") && (met != "continuous"))
+                    std::string met_lc = lc(met);
+                    if ((met_lc != "discrete") && (met_lc != "continuous"))
                     {
                         std::cout << "[INPUT ERROR] Metric " << met << " is not recognisable." << std::endl;
                         return -1;
@@ -190,6 +194,10 @@ namespace NNi
                         this->set_default(curr_key, algo);
                         std::cout << "Parameter " << curr_key << " has been set to default value." << std::endl;
                     }
+                    else if (curr_key == "-delta")
+                    {
+                        this->param_set.find("-delta")->second = "0.0";
+                    }
                     else
                     {
                         std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
@@ -227,7 +235,11 @@ namespace NNi
                 this->probes = 0;
                 this->output_f = "outputs/output.txt";
                 this->algorithm = "Frechet"; // LSH - Hypercube - Frechet
+<<<<<<< HEAD
                 this->metric = "continuous";       // discrete - continuous
+=======
+                this->metric = "discrete";   // discrete - continuous
+>>>>>>> acc225e10fafd8c683392d131c086c201c8f4458
                 this->delta = 0.0;
             }
             else if (argc % 2 == 1) // normal run
@@ -278,6 +290,7 @@ namespace NNi
                       << "-------------------------------------------" << std::endl;
         }
     };
+
 }
 
 #endif
