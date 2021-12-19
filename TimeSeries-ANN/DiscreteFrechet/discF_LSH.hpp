@@ -36,7 +36,7 @@ namespace dFLSH
         double delta;
         int tableSize; // size of each table
         int datasize;
-        // int windowSize;                         
+        // int windowSize;
         vector<vector<curves::Point2d>> h_curves; // stores grid-curves
         vector<vector<double>> x_vecs;            // stores real vectors x
         std::vector<Association> **hashTables;    // Association* hashTables;
@@ -46,12 +46,12 @@ namespace dFLSH
 
     public:
         LSH(vector<curves::Curve2d> *dataset, int L, double delta, int divisor_for_tableSize, bool querying_trick = false) : dataset(dataset),
-                                                                                                                           L(L),
-                                                                                                                           delta(delta),
-                                                                                                                           shifts(L),
-                                                                                                                           tableSize(dataset->size() / divisor_for_tableSize),
-                                                                                                                           eng(time(0) + clock()),
-                                                                                                                           urd(0.0, delta)
+                                                                                                                             L(L),
+                                                                                                                             delta(delta),
+                                                                                                                             shifts(L),
+                                                                                                                             tableSize(dataset->size() / divisor_for_tableSize),
+                                                                                                                             eng(time(0) + clock()),
+                                                                                                                             urd(0.0, delta)
         {
             // tune windowSize
             std::random_device rd;                                          // only used once to initialise (seed) engine
@@ -212,7 +212,7 @@ namespace dFLSH
             // for each hash table
             for (int i = 0; i < this->L; i++)
             {
-                // snap it to grid
+                // snap query it to grid
                 vector<curves::Point2d> grid_curve = this->produce_h(query, this->shifts[i].first, this->shifts[i].second);
                 int new_size = grid_curve.size();
 
@@ -241,7 +241,7 @@ namespace dFLSH
 
                 // querying trick, check only curves with identical grid_curves
                 int found = 0;
-                if(querying_trick==true)
+                if (querying_trick == true)
                 {
                     // for each item in the bucket
                     for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
@@ -256,15 +256,14 @@ namespace dFLSH
                                 curr_NN.first = this->hashTables[i][bucket][j].curve;
                                 curr_NN.second = dfd;
                             }
-                            
+
                             cout << "QUERYING TRICK returned ann for " << query.id << endl;
-                            found = 1;    
+                            found = 1;
                         }
                     }
-                    if(found==1)
+                    if (found == 1)
                         return curr_NN;
                 }
-
 
                 // for each item in the bucket
                 for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
@@ -286,8 +285,73 @@ namespace dFLSH
                     }
                 }
             }
-            //std::cout << "SEARCHED: " << searched << endl;
+            // std::cout << "SEARCHED: " << searched << endl;
             return curr_NN;
+        }
+
+        // performs the LSH range search algorithm to find nearest neighbours of query in a given radius (using discrete Frechet distance)
+        std::vector<std::pair<curves::Curve2d *, double>> RangeSearch(curves::Curve2d &query, double radius, int threshold = 0)
+        {
+            std::vector<std::pair<curves::Curve2d *, double>> neighbours;
+
+            int starting_size = query.data.size();
+
+            int searched = 0; // will be used to check if we reached threshold of checks
+            // for each hash table
+            for (int i = 0; i < this->L; i++)
+            {
+                // snap query it to grid
+                vector<curves::Point2d> grid_curve = this->produce_h(query, this->shifts[i].first, this->shifts[i].second);
+                int new_size = grid_curve.size();
+
+                // produce vector x
+                vector<double> x_vec = this->concat_points(grid_curve);
+
+                // apply padding if needed
+                if (starting_size > new_size)
+                {
+                    for (int z = new_size; z < starting_size; z++)
+                    {
+                        // apply twice because curve is 2d
+                        x_vec.push_back(this->padding);
+                        x_vec.push_back(this->padding);
+                    }
+                }
+
+                // create Item object so we can use produce_g from previous project
+                Item *item_for_g = new Item(query.id, x_vec);
+
+                // find the bucket
+                long unsigned id = this->g_family->produce_g(*item_for_g);
+                long unsigned bucket = id % (long unsigned)this->tableSize;
+
+                delete item_for_g; // we don't need it anymore
+
+                // for each item in the bucket
+                for (int j = 0; j < this->hashTables[i][bucket].size(); j++)
+                {
+                    // check if we bumped into same curve before doing calculations (and is already in neighbours vector)
+                    for (int a = 0; a < neighbours.size(); a++)
+                    {
+                        /* In the "reverse assignment with range search using LSH" clustering algorithm we mark items when they are
+                        assigned to a cluster so the next range search doesn't check them.*/
+                        if ((this->hashTables[i][bucket][j].curve->id != neighbours[a].first->id) && (this->hashTables[i][bucket][j].curve->marked == false))
+                        {
+                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query)[this->hashTables[i][bucket][j].curve->data.size() - 1][query.data.size() - 1];
+                            // if curve is in radius
+                            if (dfd < radius)
+                            {
+                                // add it to the neighbours of the query
+                                neighbours.push_back(std::make_pair(hashTables[i][bucket][j].curve, dfd));
+                            }
+                            searched++;
+                            if (threshold != 0 && searched >= threshold)
+                                return neighbours;
+                        }
+                    }
+                }
+            }
+            return neighbours;
         }
     };
 }

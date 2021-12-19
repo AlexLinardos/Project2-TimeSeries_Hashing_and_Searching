@@ -26,11 +26,18 @@ namespace curves
         std::vector<Point2d> data;
         bool success = true; // checks that object was constructed succesfully using 2 vectors of same length
 
+        int cluster = 0; // index of cluster to which this item is assigned
+        // int cluster2 = -1; // second nearest cluster
+
+        bool null = false;    // flag if is NULL item created to initialize a pair vector for knn and brute foce algorithms
+        bool claimed = false; // will be used in reverse assignment to indicate if item has been claimed by a ball (in order to resolve conflicts)
+        bool marked = false;  // will be used in reverse assignment to indicate item has been assigned to a cluster
+
         Curve2d(std::string id) : id(id) {}
 
         Curve2d(std::string id, std::vector<Point2d> &p_data) : id(id)
         {
-            for (int i=0; i< p_data.size(); i++)
+            for (int i = 0; i < p_data.size(); i++)
             {
                 this->data.push_back(p_data[i]);
             }

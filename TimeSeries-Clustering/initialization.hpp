@@ -16,7 +16,7 @@ namespace init
     {
     private:
         int n_centers;                  // number of centers to be initialized
-        std::vector<Item> dataset;      // a dataset of vector
+        std::vector<Item> dataset;      // a dataset of vectors
         int dimensions;                 // dimensions of vectors in the dataset
         std::default_random_engine eng; // an engine to help us pick first center randomnly
         std::uniform_int_distribution<int> uid;
