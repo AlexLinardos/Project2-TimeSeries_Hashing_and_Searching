@@ -3,6 +3,9 @@
 #include <vector>
 #include "../ui/Clustering_interface.hpp"
 #include "../TimeSeries-Clustering/initialization.hpp"
+#include "../TimeSeries-Clustering/assignment.hpp"
+#include "../TimeSeries-ANN/L2/LSH.hpp"
+#include "../TimeSeries-ANN/L2/HC.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -23,34 +26,126 @@ int main(int argc, char *argv[])
     std::vector<Item> *dataset = new vector<Item>;
     read_items(dataset, params.input_f);
 
-    // convert it to dataset of curves
-    vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
-    // create a vector that will help us represent time
-    vector<double> t_dimension;
-    for (int i = 0; i < (*dataset)[0].xij.size(); i++)
-    {
-        t_dimension.push_back(i);
-    }
-
-    // create a dataset of curves using our original dataset and the time vector
-    for (int i = 0; i < 100; i++)
-    {
-        curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
-    }
-
     if (lc(params.update) == "mean vector")
     {
+        std::cout << "Initializing centroids..." << std::endl;
         init::VectorInitializer initializer = init::VectorInitializer(params.clusters, (*dataset), (*dataset)[0].xij.size());
         std::vector<Item> centroids = initializer.initialize_pp();
+
+        std::cout << "Clustering..." << std::endl;
+        assign::VectorAssignor assignor = assign::VectorAssignor(params.clusters, centroids, (*dataset), (*dataset)[0].xij.size());
+        if (lc(params.assignment) == "classic")
+        {
+            assignor.Lloyds();
+            // print results
+            for (int i = 0; i < assignor.clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < assignor.clusters[i].size(); j++)
+                {
+                    std::cout << assignor.clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+        else if (lc(params.assignment) == "lsh")
+        {
+            // we must construct an LSH object to pass as parameter in the assignment algorithm
+            LSH_params lsh_params;
+            lsh_params.k = params.k;
+            lsh_params.L = params.L;
+
+            LSH lsh_object = LSH(lsh_params, (*dataset), 1.0, 8);
+            assignor.Range_LSH(lsh_object);
+            // print results
+            for (int i = 0; i < assignor.clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < assignor.clusters[i].size(); j++)
+                {
+                    std::cout << assignor.clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+        else if (lc(params.assignment) == "hypercube")
+        {
+            // we must construct a Hypercube object to pass as parameter in the assignment algorithm
+            Cube_params hc_params;
+            hc_params.k = params.k;
+            hc_params.M = params.M;
+            hc_params.probes = params.probes;
+
+            F f = F(hc_params.k);
+            Hypercube hc_object = Hypercube(hc_params, (*dataset), 1.0, f.h_maps);
+            assignor.Range_HC(hc_object);
+            // print results
+            for (int i = 0; i < assignor.clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < assignor.clusters[i].size(); j++)
+                {
+                    std::cout << assignor.clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
     }
     if (lc(params.update) == "mean frechet")
     {
-        std::cout << "Initializing..." << std::endl;
+        // convert dataset to curves
+        vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
+        // create a vector that will help us represent time
+        vector<double> t_dimension;
+        for (int i = 0; i < (*dataset)[0].xij.size(); i++)
+        {
+            t_dimension.push_back(i);
+        }
+        // create a dataset of curves using our original dataset and the time vector
+        for (int i = 0; i < 100; i++)
+        {
+            curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
+        }
+
+        std::cout << "Initializing centroids..." << std::endl;
         init::CurveInitializer initializer = init::CurveInitializer(params.clusters, (*curves_dataset));
         std::vector<curves::Curve2d> centroids = initializer.initialize_pp();
-        for (int i = 0; i < centroids.size(); i++)
+
+        std::cout << "Clustering..." << std::endl;
+        assign::CurveAssignor assignor = assign::CurveAssignor(params.clusters, centroids, (*curves_dataset));
+        if (lc(params.assignment) == "classic")
         {
-            std::cout << "id" << i << ": " << centroids[i].id << ", ";
+            assignor.Lloyds();
+            // print results
+            for (int i = 0; i < assignor.clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < assignor.clusters[i].size(); j++)
+                {
+                    std::cout << assignor.clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+        else if (lc(params.assignment) == "lsh_frechet")
+        {
+            double delta = delta_tuning(*curves_dataset);
+
+            // we must construct a discrete Frechet LSH object to pass as parameter in the assignment algorithm
+            dFLSH::LSH *dflsh_object = new dFLSH::LSH(curves_dataset, params.L, delta, 8);
+
+            assignor.Range_dfLSH(*dflsh_object);
+            // print results
+            for (int i = 0; i < assignor.clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < assignor.clusters[i].size(); j++)
+                {
+                    std::cout << assignor.clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+            delete dflsh_object;
         }
     }
 

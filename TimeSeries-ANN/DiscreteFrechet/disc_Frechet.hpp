@@ -37,29 +37,87 @@ namespace dF
     }
 
     // calculates discrete Frechet distance between two curves (returns table of dynamic programming approach)
-    double **discrete_frechet(const curves::Curve2d &p, const curves::Curve2d &q)
+    double **discrete_frechet_table(const curves::Curve2d &p, const curves::Curve2d &q)
     {
         int pl = p.data.size();
         int ql = q.data.size();
+
         double **c = new double *[pl];
-        for (int i = 0; i < pl; i++)
+        try
         {
-            c[i] = new double[ql];
-        }
-        
-        // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
-        for (int i = 0; i < pl; i++)
-        {
-            for (int j = 0; j < ql; j++)
+            for (int i = 0; i < pl; i++)
             {
-                c[i][j] = -1;
+                c[i] = new double[ql];
+            }
+
+            // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
+            for (int i = 0; i < pl; i++)
+            {
+                for (int j = 0; j < ql; j++)
+                {
+                    c[i][j] = -1;
+                }
             }
         }
+        catch (...)
+        {
+            std::cout << "INITIALIZATION" << endl;
+            std::cout << "pl: " << pl << " ql: " << ql << endl;
+        }
+
         // base case
         c[0][0] = L2(p.data[0].x, p.data[0].y, q.data[0].x, q.data[0].y);
+
         // compute
         compute_c(c, pl - 1, ql - 1, p, q);
+
         return c;
+    }
+
+    // calculates discrete Frechet distance between two curves (returns only final value)
+    double discrete_frechet(const curves::Curve2d &p, const curves::Curve2d &q)
+    {
+        int pl = p.data.size();
+        int ql = q.data.size();
+
+        double **c = new double *[pl];
+        try
+        {
+            for (int i = 0; i < pl; i++)
+            {
+                c[i] = new double[ql];
+            }
+
+            // initialize 2d table for dynamic programming with value -1 (since distance cannot be negative)
+            for (int i = 0; i < pl; i++)
+            {
+                for (int j = 0; j < ql; j++)
+                {
+                    c[i][j] = -1;
+                }
+            }
+        }
+        catch (...)
+        {
+            std::cout << "INITIALIZATION" << endl;
+            std::cout << "pl: " << pl << " ql: " << ql << endl;
+        }
+
+        // base case
+        c[0][0] = L2(p.data[0].x, p.data[0].y, q.data[0].x, q.data[0].y);
+
+        // compute
+        compute_c(c, pl - 1, ql - 1, p, q);
+
+        double result = c[pl - 1][ql - 1];
+
+        for (int i = 0; i < pl; i++)
+        {
+            delete[] c[i];
+        }
+        delete[] c;
+
+        return result;
     }
 
     // searches for the exact nearest neighbour of the query curve using brute force approach
@@ -80,7 +138,7 @@ namespace dF
         for (int i = 0; i < dataset.size(); i++)
         {
             // calculate discrete Frechet distance to it from given query
-            double dfd = dF::discrete_frechet(query, dataset[i])[size - 1][size - 1];
+            double dfd = dF::discrete_frechet(query, dataset[i]);
             // if nearer curve is found
             if (dfd < curr_NN.second)
             {

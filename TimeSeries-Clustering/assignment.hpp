@@ -16,13 +16,11 @@ namespace assign
     class VectorAssignor
     {
     private:
-        int n_centers;                 // number of centers/clusters
-        std::vector<Item> dataset;     // a dataset of vectors
-        int dimensions;                // dimensions of vectors in the dataset
-        std::vector<Item> centers;     // cluster centers (constructor receives them initialized)
-        vector<vector<Item>> clusters; // the clusters of items
-        vector<int> assignments_vec;   // shows the cluster to which each vector is assigned to
-                                       // (example: if assignments[4]=2 then item at index 4 of dataset is assigned to cluster at index 2)
+        int n_centers;               // number of centers/clusters
+        std::vector<Item> dataset;   // a dataset of vectors
+        int dimensions;              // dimensions of vectors in the dataset
+        vector<int> assignments_vec; // shows the cluster to which each vector is assigned to
+                                     // (example: if assignments[4]=2 then item at index 4 of dataset is assigned to cluster at index 2)
 
         // helper method that calculates starting radius for Reverse Assignment algorithms, which is min(dist between centers)/2
         double calculate_start_radius()
@@ -46,9 +44,14 @@ namespace assign
         }
 
     public:
+        std::vector<Item> centers;     // cluster centers (constructor receives them initialized)
+        vector<vector<Item>> clusters; // the clusters of items
         VectorAssignor(int n_centers, std::vector<Item> centers, std::vector<Item> dataset, int dimensions) : n_centers(n_centers),
+                                                                                                              centers(centers),
                                                                                                               dataset(dataset),
-                                                                                                              dimensions(dimensions) {}
+                                                                                                              dimensions(dimensions),
+                                                                                                              clusters(n_centers),
+                                                                                                              assignments_vec(dataset.size()) {}
 
         /* Assigns a nearest center to each point (part 1 of Lloyd's algorithm) using L2 distance.
          Stores both the current assignments and the current clusters in "assignments_vec" and "clusters" attributes respectively */
@@ -59,7 +62,8 @@ namespace assign
             {
                 if (dataset[i].marked) // if item is marked, it is assigned in a cluster during reverse_assignement
                     continue;
-                double min_d = EuclideanDistance(&centers[0], &this->dataset[i], this->dimensions);
+
+                double min_d = EuclideanDistance(&(centers[0]), &(this->dataset[i]), this->dimensions);
                 nearest_cntr = 0;
                 for (int c = 1; c < centers.size(); ++c)
                 {
@@ -221,12 +225,10 @@ namespace assign
     class CurveAssignor
     {
     private:
-        int n_centers;                            // number of centers/clusters
-        std::vector<curves::Curve2d> dataset;     // a dataset of curves
-        std::vector<curves::Curve2d> centers;     // cluster centers (constructor receives them initialized)
-        vector<vector<curves::Curve2d>> clusters; // the clusters of curves
-        vector<int> assignments_vec;              // shows the cluster to which each curve is assigned to
-                                                  // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
+        int n_centers;                        // number of centers/clusters
+        std::vector<curves::Curve2d> dataset; // a dataset of curves
+        vector<int> assignments_vec;          // shows the cluster to which each curve is assigned to
+                                              // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
 
         // helper method that calculates starting radius for Reverse Assignment algorithms, which is min(dist between centers)/2
         double calculate_start_radius()
@@ -238,7 +240,7 @@ namespace assign
                 {
                     if (i != j)
                     {
-                        double dist = dF::discrete_frechet(this->centers[i], this->centers[j])[this->centers[i].data.size() - 1][this->centers[j].data.size() - 1];
+                        double dist = dF::discrete_frechet(this->centers[i], this->centers[j]);
                         if (dist < min_dist)
                         {
                             min_dist = dist;
@@ -250,8 +252,14 @@ namespace assign
         }
 
     public:
-        CurveAssignor(int n_centers, std::vector<curves::Curve2d> centers, std::vector<curves::Curve2d> dataset, int dimensions) : n_centers(n_centers),
-                                                                                                                                   dataset(dataset) {}
+        std::vector<curves::Curve2d> centers;     // cluster centers (constructor receives them initialized)
+        vector<vector<curves::Curve2d>> clusters; // the clusters of curves
+
+        CurveAssignor(int n_centers, std::vector<curves::Curve2d> centers, std::vector<curves::Curve2d> dataset) : n_centers(n_centers),
+                                                                                                                   centers(centers),
+                                                                                                                   dataset(dataset),
+                                                                                                                   clusters(n_centers),
+                                                                                                                   assignments_vec(dataset.size()) {}
 
         /* Assigns a nearest center to each point (part 1 of Lloyd's algorithm) using L2 distance.
          Stores both the current assignments and the current clusters in "assignments_vec" and "clusters" attributes respectively */
@@ -260,19 +268,23 @@ namespace assign
             int nearest_cntr;
             for (int i = 0; i < this->dataset.size(); ++i)
             {
+
                 if (dataset[i].marked) // if item is marked, it is assigned in a cluster during reverse_assignement
                     continue;
-                double min_d = dF::discrete_frechet(this->centers[0], this->dataset[i])[this->centers[0].data.size() - 1][this->dataset[i].data.size() - 1];
+
+                double min_d = dF::discrete_frechet(this->centers[0], this->dataset[i]);
                 nearest_cntr = 0;
+
                 for (int c = 1; c < centers.size(); ++c)
                 {
-                    double next_d = dF::discrete_frechet(this->centers[c], this->dataset[i])[this->centers[c].data.size() - 1][this->dataset[i].data.size() - 1];
+                    double next_d = dF::discrete_frechet(this->centers[c], this->dataset[i]);
                     if (next_d < min_d)
                     {
                         min_d = next_d;
                         nearest_cntr = c;
                     }
                 }
+
                 this->assignments_vec[i] = nearest_cntr;
                 this->clusters[nearest_cntr].push_back(this->dataset[i]); // push it into a cluster based on assigned center
                 dataset[i].cluster = nearest_cntr;
@@ -316,9 +328,9 @@ namespace assign
                             // if we are here the item has already been assigned to another cluster
                             int assigned_cluster = step_assignments[item->id].second;
 
-                            double dist_to_assigned = dF::discrete_frechet(this->centers[assigned_cluster], *item)[this->centers[assigned_cluster].data.size() - 1][item->data.size() - 1];
+                            double dist_to_assigned = dF::discrete_frechet(this->centers[assigned_cluster], *item);
 
-                            double dist_to_curr = dF::discrete_frechet(this->centers[c], *item)[this->centers[c].data.size() - 1][item->data.size() - 1];
+                            double dist_to_curr = dF::discrete_frechet(this->centers[c], *item);
 
                             if (dist_to_curr < dist_to_assigned)
                                 step_assignments[item->id] = make_pair(item, c); // temp assignment of item to cluster of index c

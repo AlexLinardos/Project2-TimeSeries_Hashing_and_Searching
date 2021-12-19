@@ -134,14 +134,14 @@ namespace init
             for (int i = 0; i < this->dataset.size(); ++i)
             {
                 // calculate Frechet distance from nearest centoid
-                double min_dist = dF::discrete_frechet(centroids[0], this->dataset[i])[centroids[0].data.size() - 1][this->dataset[i].data.size() - 1];
+                double min_dist = dF::discrete_frechet(centroids[0], this->dataset[i]);
                 if (min_dist > max_d)
                 {
                     max_d = min_dist;
                 }
                 for (int cntr = 1; cntr < centroids.size(); ++cntr)
                 {
-                    double dist = dF::discrete_frechet(centroids[cntr], this->dataset[i])[centroids[cntr].data.size() - 1][this->dataset[i].data.size() - 1];
+                    double dist = dF::discrete_frechet(centroids[cntr], this->dataset[i]);
                     if (dist > max_d)
                         max_d = dist;
                     if (dist < min_dist)

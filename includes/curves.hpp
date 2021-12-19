@@ -68,20 +68,20 @@ double point2d_L2(curves::Point2d &point1, curves::Point2d &point2)
     return sqrt(dist);
 }
 
-double  avg_p_dist(curves::Curve2d &curve) // calculates the average distance between the vertices of a curve
+double avg_p_dist(curves::Curve2d &curve) // calculates the average distance between the vertices of a curve
 {
     double avg = 0.0;
-    for(int i=0; i<curve.data.size()-1; i++)
+    for (int i = 0; i < curve.data.size() - 1; i++)
     {
-        avg += point2d_L2(curve.data[i], curve.data[i+1]) / curve.data.size();
+        avg += point2d_L2(curve.data[i], curve.data[i + 1]) / curve.data.size();
     }
     return avg;
 }
 
-double  delta_tuning(std::vector<curves::Curve2d> &curves) // calculates the average distance between the vertices of a curve
+double delta_tuning(std::vector<curves::Curve2d> &curves) // calculates the average distance between the vertices of a curve
 {
-    std::random_device rd;                                          // only used once to initialise (seed) engine
-    std::mt19937 rng(rd());                                         // random-number engine used (Mersenne-Twister in this case)
+    std::random_device rd;                                        // only used once to initialise (seed) engine
+    std::mt19937 rng(rd());                                       // random-number engine used (Mersenne-Twister in this case)
     std::uniform_int_distribution<int> uni(0, curves.size() - 1); // guaranteed unbiased
 
     int curve_index_1;
@@ -89,7 +89,7 @@ double  delta_tuning(std::vector<curves::Curve2d> &curves) // calculates the ave
 
     double avg = 0.0;
 
-    /* 
+    /*
         For dataset.size()/4 samples we randomly choose a curve and calculate the average distance between its' vertices.
         We sum these average disances and calculate the average.
     */
@@ -108,14 +108,14 @@ double  delta_tuning(std::vector<curves::Curve2d> &curves) // calculates the ave
 
 bool identical_curves(vector<curves::Point2d> &curve1, vector<curves::Point2d> &curve2)
 {
-    //int curve_size = curve1.data.size();
+    // int curve_size = curve1.data.size();
 
-    if(curve1.size()!=curve2.size())
+    if (curve1.size() != curve2.size())
         return false;
 
-    for(int i=0; i<curve1.size(); i++)
+    for (int i = 0; i < curve1.size(); i++)
     {
-        if((curve1[i].x!=curve2[i].x) || (curve1[i].y!=curve2[i].y))
+        if ((curve1[i].x != curve2[i].x) || (curve1[i].y != curve2[i].y))
             return false;
     }
     return true;
@@ -123,14 +123,14 @@ bool identical_curves(vector<curves::Point2d> &curve1, vector<curves::Point2d> &
 
 bool identical_curves(vector<double> &curve1, vector<double> &curve2)
 {
-    //int curve_size = curve1.size();
+    // int curve_size = curve1.size();
 
-    if(curve1.size()!=curve2.size())
+    if (curve1.size() != curve2.size())
         return false;
 
-    for(int i=0; i<curve1.size(); i++)
+    for (int i = 0; i < curve1.size(); i++)
     {
-        if((curve1[i]!=curve2[i]))
+        if ((curve1[i] != curve2[i]))
             return false;
     }
     return true;

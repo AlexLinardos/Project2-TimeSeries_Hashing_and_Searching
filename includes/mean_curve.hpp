@@ -9,7 +9,7 @@
 vector<std::pair<int, int>> optimal_traversal(curves::Curve2d &p, curves::Curve2d &q)
 {
     // get dynamic programming table from discrete Frechet
-    double **c = dF::discrete_frechet(p, q);
+    double **c = dF::discrete_frechet_table(p, q);
 
     // initialise empty list(aka vector) of pairs
     std::vector<std::pair<int, int>> traversal;
@@ -40,6 +40,12 @@ vector<std::pair<int, int>> optimal_traversal(curves::Curve2d &p, curves::Curve2
         pi = minIdx_p;
         qi = minIdx_q;
     }
+    for (int i = 0; i < p.data.size(); i++)
+    {
+        delete[] c[i];
+    }
+    delete[] c;
+
     // corner-cases of endgame
     while (pi != 0) // if curve p still has steps to go but q has ended
     {
@@ -75,7 +81,8 @@ std::vector<curves::Point2d> mean_curve(curves::Curve2d &p, curves::Curve2d &q)
 }
 
 // calculates the mean curve of multiple curves given in a std::vector using discrete Frechet distance
-std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
+std::vector<curves::Point2d>
+mean_of_curves(vector<curves::Curve2d> &curves)
 {
     vector<vector<curves::Point2d>> curves_points;
     int i = 0;
@@ -98,11 +105,11 @@ std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
 
     while (curves_points.size() != 1)
     {
-        cout << curves_points.size() << endl;
+        std::cout << curves_points.size() << endl;
         remaining = curves_points.size();
         while (remaining > 1)
         {
-            cout << "remaining: " << remaining << endl;
+            std::cout << "remaining: " << remaining << endl;
             curves::Curve2d curve1 = curves::Curve2d("null", curves_points[remaining - 2]);
             curves::Curve2d curve2 = curves::Curve2d("null", curves_points[remaining - 1]);
             curves_points.push_back(mean_curve(curve1, curve2));
@@ -112,8 +119,8 @@ std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
         }
     }
 
-    cout << curves_points.size() << endl;
-    cout << curves_points[0].size() << endl;
+    std::cout << curves_points.size() << endl;
+    std::cout << curves_points[0].size() << endl;
     // for(int i=0; i<curves_points[0].size(); i++)
     // {
     //     cout << "[" << curves_points[0][i].x << ", " << curves_points[0][i].y << "] ";

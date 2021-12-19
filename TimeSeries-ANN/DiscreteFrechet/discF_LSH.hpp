@@ -69,7 +69,7 @@ namespace dFLSH
                 item_index_2 = uni(rng);
                 while (item_index_1 == item_index_2)
                     item_index_2 = uni(rng);
-                distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])[dataset->size() - 1][dataset->size() - 1]) / (double)(dataset->size() / 4);
+                distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
             }
             // this->windowSize = (int)floor(factor_for_windowSize * distance);
             // std::cout << "windowSize: " << this->windowSize << std::endl;
@@ -248,7 +248,7 @@ namespace dFLSH
                     {
                         if (identical_curves(h_curves.back(), *(this->hashTables[i][bucket][j].grid_curve)))
                         {
-                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query)[this->hashTables[i][bucket][j].curve->data.size() - 1][query.data.size() - 1];
+                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query);
                             // if nearer curve is found
                             if (dfd < curr_NN.second)
                             {
@@ -271,7 +271,7 @@ namespace dFLSH
                     // check if we bumped into same curve as current nearest before doing calculations
                     if (this->hashTables[i][bucket][j].curve->id != curr_NN.first->id)
                     {
-                        double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query)[this->hashTables[i][bucket][j].curve->data.size() - 1][query.data.size() - 1];
+                        double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query);
                         // if nearer curve is found
                         if (dfd < curr_NN.second)
                         {
@@ -337,7 +337,7 @@ namespace dFLSH
                         assigned to a cluster so the next range search doesn't check them.*/
                         if ((this->hashTables[i][bucket][j].curve->id != neighbours[a].first->id) && (this->hashTables[i][bucket][j].curve->marked == false))
                         {
-                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query)[this->hashTables[i][bucket][j].curve->data.size() - 1][query.data.size() - 1];
+                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query);
                             // if curve is in radius
                             if (dfd < radius)
                             {

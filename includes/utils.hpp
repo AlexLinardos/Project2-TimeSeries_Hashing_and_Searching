@@ -122,7 +122,6 @@ double EuclideanDistance(const Item *p, const Item *q, const uint16_t &d)
     {
         sum += (p->xij[i] - q->xij[i]) * (p->xij[i] - q->xij[i]);
     }
-
     return sqrt(sum);
 }
 
