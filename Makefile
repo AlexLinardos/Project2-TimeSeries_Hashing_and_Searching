@@ -32,10 +32,10 @@ simplification.o: ./TimeSeries-ANN/ContinuousFrechet/Fred/simplification.cpp ./T
 
 cluster: final_cluster clean1
 
-final_cluster: cluster_main.o
-	$(CC) cluster_main.o -o bin/cluster $(CFLAGS)
+final_cluster: cluster_main.o config.o curve.o frechet.o interval.o point.o simplification.o
+	$(CC) cluster_main.o config.o curve.o frechet.o interval.o point.o simplification.o -o bin/cluster $(CFLAGS)
 
-cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp ./TimeSeries-Clustering/initialization.hpp ./TimeSeries-Clustering/assignment.hpp ./TimeSeries-Clustering/update.hpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp
+cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp ./TimeSeries-Clustering/c_clustering.hpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp
 	$(CC) -c ./src/cluster_main.cpp $(CFLAGS) $(CXXFLAGS)
 
 clean:

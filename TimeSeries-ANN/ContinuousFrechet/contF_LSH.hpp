@@ -83,7 +83,7 @@ namespace cF
             }
         }
 
-        cout << "filtering cut " << total_cuts << " points out of "<< og_size << endl;
+        // cout << "filtering cut " << total_cuts << " points out of "<< og_size << endl;
         return;
     }
 
@@ -117,7 +117,7 @@ namespace cF
             }
         }
 
-        cout << "filtering cut " << total_cuts << " points out of "<< og_size << endl;
+        // cout << "filtering cut " << total_cuts << " points out of "<< og_size << endl;
         return;
     }
 
@@ -125,7 +125,7 @@ namespace cF
     {
         for (int i = 0; i < curve_dataset.size(); i++)
         {
-            cout << "curve#" << i << ": ";
+            // cout << "curve#" << i << ": ";
             filter_curve(curve_dataset[i], e);
         }
     }

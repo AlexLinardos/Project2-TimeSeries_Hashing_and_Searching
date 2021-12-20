@@ -104,11 +104,11 @@ std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
 
     while (curves_points.size() != 1)
     {
-        std::cout << curves_points.size() << endl;
+        // std::cout << curves_points.size() << endl;
         remaining = curves_points.size();
         while (remaining > 1)
         {
-            std::cout << "remaining: " << remaining << endl;
+            // std::cout << "remaining: " << remaining << endl;
             curves::Curve2d curve1 = curves::Curve2d("null", curves_points[remaining - 2]);
             curves::Curve2d curve2 = curves::Curve2d("null", curves_points[remaining - 1]);
             curves_points.push_back(mean_curve(curve1, curve2));
@@ -118,8 +118,8 @@ std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
         }
     }
 
-    std::cout << curves_points.size() << endl;
-    std::cout << curves_points[0].size() << endl;
+    // std::cout << curves_points.size() << endl;
+    // std::cout << curves_points[0].size() << endl;
     // for(int i=0; i<curves_points[0].size(); i++)
     // {
     //     cout << "[" << curves_points[0][i].x << ", " << curves_points[0][i].y << "] ";

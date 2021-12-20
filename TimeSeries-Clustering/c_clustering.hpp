@@ -6,7 +6,6 @@
 #include <string>
 #include <random>
 #include <chrono>
-#include "../includes/curves.hpp"
 #include "../includes/utils.hpp"
 #include "../includes/mean_curve.hpp"
 #include "../TimeSeries-ANN/DiscreteFrechet/disc_Frechet.hpp"
@@ -18,6 +17,7 @@ namespace curve_cluster
 {
     class Clustering
     {
+        Cli::Cluster_params params;
         int n_centers;  // number of centers to be initialized
         std::vector<curves::Curve2d> * dataset; // a dataset of curves
 
@@ -100,13 +100,18 @@ namespace curve_cluster
         }
 
         public:
-        Clustering(int n_centers, std::vector<curves::Curve2d> * dataset) : n_centers(n_centers),
+        Clustering(Cli::Cluster_params &params, std::vector<curves::Curve2d> * dataset) : params(params),
+                                                                                n_centers(params.clusters),
+                                                                                clusters(params.clusters),
+                                                                                assignments_vec(dataset->size()),
                                                                                 dataset(dataset),
                                                                                 eng(chrono::system_clock::now().time_since_epoch().count()),
                                                                                 uid(0, dataset->size() - 1) {}
 
         void initialize_pp()
         {
+            cout << "init " << endl;
+
             // pick first centroid at random
             int rcentroid_index = this->uid(eng);
             centers.push_back((*dataset)[rcentroid_index].data);
@@ -138,6 +143,7 @@ namespace curve_cluster
          Stores both the current assignments and the current clusters in "assignments_vec" and "clusters" attributes respectively */
         void Lloyds_assignment()
         {
+            // cout << "assign " << clusters.size() << endl;
             int nearest_cntr;
             for (int i = 0; i < this->dataset->size(); ++i)
             {
@@ -148,8 +154,11 @@ namespace curve_cluster
                 double min_d = dF::discrete_frechet_for_data(this->centers[0], (*dataset)[i].data);
                 nearest_cntr = 0;
 
+                // cout << centers.size() << endl;
+
                 for (int c = 1; c < centers.size(); ++c)
                 {
+                    // cout << c << endl;
                     double next_d = dF::discrete_frechet_for_data(this->centers[c], (*dataset)[i].data);
                     if (next_d < min_d)
                     {
@@ -158,8 +167,11 @@ namespace curve_cluster
                     }
                 }
 
+                // cout << "bef pushback " << nearest_cntr << endl;
                 this->assignments_vec[i] = nearest_cntr;
+                // cout << "bef pushback 2 " << assignments_vec[i] << endl;
                 this->clusters[nearest_cntr].push_back((*dataset)[i]); // push it into a cluster based on assigned center
+                // cout << "aft pushback " << endl;
                 (*dataset)[i].cluster = nearest_cntr;
             }
         }
@@ -238,12 +250,88 @@ namespace curve_cluster
         // update step of clustering for curves by calculation of mean curve
         void update_curve_centers()
         {
+            cout << "update " << endl;
             // we must calculate mean per cluster and make it the new center
             for (int i = 0; i < centers.size(); ++i)
             {
                 centers[i] = mean_of_curves(clusters[i]);
             }
         }
+
+        void perform_Lloyds(int max_iter)
+        {
+            cout << "perf lloyds " << endl;
+            int iter = 1; // iterations
+            this->initialize_pp();
+
+            this->Lloyds_assignment();
+            this->update_curve_centers();
+
+            for (int i = 0; i < clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < clusters[i].size(); j++)
+                {
+                    std::cout << clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+
+            vector<int> last_assignments(this->assignments_vec.size());
+            do
+            {
+                last_assignments = this->assignments_vec;
+                for (int i = 0; i < this->clusters.size(); ++i)
+                {
+                    this->clusters[i].clear(); // clear clusters so we can reassign the items
+                }
+
+                this->Lloyds_assignment();
+                this->update_curve_centers();
+                iter++;
+                // iterate until assignments don't change or until we reach max_iter threshold
+            } while ((!equal(assignments_vec.begin(), assignments_vec.end(), last_assignments.begin())) && iter < max_iter);
+
+            std::cout << "AFTER LLOYDS " << std::endl;
+            for (int i = 0; i < clusters.size(); i++)
+            {
+                std::cout << "CLUSTER " << i << std::endl;
+                for (int j = 0; j < clusters[i].size(); j++)
+                {
+                    std::cout << clusters[i][j].id << " ";
+                }
+                std::cout << std::endl;
+            }
+
+            cout << "............................................" << endl;
+            cout << "Lloyd's algorithm ended after " << iter << " iterations" << endl;
+        }
+
+        // void Reverse_Assignment_Cluestering(int max_iterations)
+        // {
+        //     double delta = delta_tuning(*dataset);
+
+        //     // we must construct a discrete Frechet LSH object to pass as parameter in the assignment algorithm
+        //     dFLSH::LSH *dflsh_object = new dFLSH::LSH(dataset, params.L, delta, 8);
+
+        //     int iter = 0; // iterations
+        //     vector<vector<curves::Point2d>> old_centers = this->centers;
+
+        //     do
+        //     {
+        //         for (int i = 0; i < this->clusters.size(); ++i)
+        //             this->clusters[i].clear(); // clear clusters so we can reassign the items
+        //         for (int i = 0; i < dataset->size(); i++)
+        //             (*dataset)[i].marked = false;
+        //         Range_dfLSH_assignment(*dflsh_object);
+        //         old_centers = centers;
+        //         update_centers();
+        //         iter++;
+        //     } while (iter < max_iterations);
+
+        //     cout << "............................................" << endl;
+        //     cout << "Reverse Assignment Cluestering ended after " << iter << " iterations" << endl;
+        // }
     };
 }
 #endif
