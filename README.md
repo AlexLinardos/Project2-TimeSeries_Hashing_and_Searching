@@ -161,9 +161,9 @@ For the nearest neighbour search we used the following metrics to evaluate the p
 * timeApproximateAverage/timeTrueAverage (printed in std out)
 
 Performance tests per method:<br>
-* __LSH/Hypercube for vectors__ : As expected, these methods did not perform as good as they did in our previous project. While they are not unusable (they finish slightly faster than the brute force method without being too far off), it is pretty clear that the complexity of the curves requires a different approach in order to have satisfying results.
+* __LSH/Hypercube for vectors__ : As expected, these methods did not perform as good as they did in our previous project. While they are not unusable, it is pretty clear that the complexity of the curves requires a different approach in order to have satisfying results and thus making them not worth using over a brute force approach.
 * __LSH for curves with discrete Frechet__ : Definitely an upgrade compare to the previous method and certainly the best overall. This method performs a lot faster than the brute force method and reliably returns great approximations.
-* __LSH for curves with continuous Frechet__ : While incredibly accurate, this method is extremely slow. Its low speed maybe caused by the complexity of the metric, as well as the fact that we were indicated to use "black box" functions to call the already implemented code that was provided to us (Fred folder). Even after a lot of filtering to reduce the complexity of the curves, the algorithm remains pretty slow.
+* __LSH for curves with continuous Frechet__ : While incredibly accurate, this method is extremely slow. Its low speed maybe caused by the complexity of the metric, as well as the fact that we were indicated to use "black box" functions to call the already implemented code that was provided to us (Fred directory). Even after a lot of filtering to reduce the complexity of the curves, the algorithm remains pretty slow.
 
 
 
