@@ -21,8 +21,6 @@ namespace curve_cluster
         int n_centers;  // number of centers to be initialized
         std::vector<curves::Curve2d> * dataset; // a dataset of curves
 
-        vector<vector<curves::Point2d>> centers;
-        vector<vector<curves::Curve2d>> clusters;
         std::vector<int> assignments_vec;     // shows the cluster to which each curve is assigned to
                                               // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
 
@@ -102,6 +100,10 @@ namespace curve_cluster
         }
 
         public:
+
+        vector<vector<curves::Point2d>> centers;
+        vector<vector<curves::Curve2d>> clusters;
+
         Clustering(Cli::Cluster_params &params, std::vector<curves::Curve2d> * dataset) : params(params),
                                                                                 n_centers(params.clusters),
                                                                                 clusters(params.clusters),
@@ -453,6 +455,7 @@ namespace curve_cluster
             }
             return s;
         }
+
     };
 }
 #endif

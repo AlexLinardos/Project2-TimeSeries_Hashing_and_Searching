@@ -124,5 +124,6 @@ std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
     // {
     //     cout << "[" << curves_points[0][i].x << ", " << curves_points[0][i].y << "] ";
     // }
+    cF::filter_curve(curves_points[0], 2.0);
     return curves_points[0];
 }

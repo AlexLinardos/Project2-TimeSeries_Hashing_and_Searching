@@ -121,6 +121,9 @@ int main(int argc, char *argv[])
     // }
     if (lc(params.update) == "mean frechet")
     {
+        clock_t begin;
+        clock_t end;
+
         // convert dataset to curves
         vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
         // create a vector that will help us represent time
@@ -139,7 +142,66 @@ int main(int argc, char *argv[])
 
         curve_cluster::Clustering * c = new curve_cluster::Clustering(params, curves_dataset);
         // c->perform_Lloyds(20);
+        begin = clock();
         c->Reverse_Assignment_Clustering(20);
+        end = clock();
+
+        double elapsed = double(end - begin) / CLOCKS_PER_SEC;
+        ofstream output_file;
+        output_file.open(params.output_f);
+
+        cout << "[BUILDING OUTPUT]" << endl;
+
+        if (params.complete == true)
+        {
+            for (int i = 0; i < params.clusters; i++)
+            {
+                output_file << "CLUSTER-" << i + 1 << " {centroid: [";
+                output_file << "(" << c->centers[i][0].x << "," << c->centers[i][0].y << ")";
+                for (int j = 1; j <  c->centers[i].size(); j++)
+                {
+                    output_file << ", (" << c->centers[i][j].x << "," << c->centers[i][j].y << ")";
+                }
+                output_file << "]";
+                for (int j = 0; j < c->clusters[i].size(); j++)
+                {
+                    output_file << ", " << c->clusters[i][j].id;
+                }
+                output_file << "}" << endl;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < params.clusters; i++)
+            {
+                output_file << "CLUSTER-" << i + 1 << " {size: " << c->clusters[i].size() << ", centroid: [";
+                output_file << "(" << c->centers[i][0].x << "," << c->centers[i][0].y << ")";
+                for (int j = 1; j <  c->centers[i].size(); j++)
+                {
+                    output_file << ", (" << c->centers[i][j].x << "," << c->centers[i][j].y << ")";
+                }
+                output_file << "]}" << endl;
+            }
+        }
+
+        cout << "[CALCULATING SILHOUETTE]" << endl;
+        if (params.clusters > 1)
+        {
+            output_file << "clustering_time: " << elapsed << endl;
+            output_file << "Silhouette: [";
+            for (int i = 0; i < params.clusters; i++)
+            {
+                // cout << i << endl;
+                output_file << c->eval_specific_cluster(i) << ", ";
+            }
+            output_file << c->eval_clustering() << "]" << endl;
+        }
+        else
+        {
+            cout << "Silhouette can only be computed when there are 2 or more clusters." << endl;
+        }
+
+        output_file.close();
 
         // // INITIALIZATION STEP
         // std::cout << "Initializing centroids..." << std::endl;
