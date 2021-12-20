@@ -140,10 +140,10 @@ int main(int argc, char *argv[])
 
         cout << "hello " << params.clusters << endl;
 
-        curve_cluster::Clustering * c = new curve_cluster::Clustering(params, curves_dataset);
+        curve_cluster::Clustering *c = new curve_cluster::Clustering(params, curves_dataset);
         // c->perform_Lloyds(20);
         begin = clock();
-        c->Reverse_Assignment_Clustering(20);
+        c->Reverse_Assignment_LSH_Clustering(20);
         end = clock();
 
         double elapsed = double(end - begin) / CLOCKS_PER_SEC;

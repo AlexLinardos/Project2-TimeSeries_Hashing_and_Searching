@@ -18,15 +18,22 @@ namespace curve_cluster
     class Clustering
     {
         Cli::Cluster_params params;
-        int n_centers;  // number of centers to be initialized
-        std::vector<curves::Curve2d> * dataset; // a dataset of curves
+        int n_centers;                         // number of centers to be initialized
+        std::vector<curves::Curve2d> *dataset; // a dataset of curves
 
+<<<<<<< HEAD
         std::vector<int> assignments_vec;     // shows the cluster to which each curve is assigned to
                                               // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
+=======
+        vector<vector<curves::Point2d>> centers;
+        vector<vector<curves::Curve2d>> clusters;
+        std::vector<int> assignments_vec; // shows the cluster to which each curve is assigned to
+                                          // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
+>>>>>>> b9f060b5448162ff1012a7d4b50b0b0c557c2bae
 
         double mean_df;
 
-        std::default_random_engine eng;       // an engine to help us pick first center randomnly
+        std::default_random_engine eng; // an engine to help us pick first center randomnly
         std::uniform_int_distribution<int> uid;
 
         /* Calculates the Frechet distance of each point in dataset from its nearest centroid
@@ -99,6 +106,7 @@ namespace curve_cluster
             return min_dist / 2;
         }
 
+<<<<<<< HEAD
         public:
 
         vector<vector<curves::Point2d>> centers;
@@ -112,11 +120,20 @@ namespace curve_cluster
                                                                                 mean_df(dF::mean_df_between_curves(*dataset)),
                                                                                 eng(chrono::system_clock::now().time_since_epoch().count()),
                                                                                 uid(0, dataset->size() - 1) {}
+=======
+    public:
+        Clustering(Cli::Cluster_params &params, std::vector<curves::Curve2d> *dataset) : params(params),
+                                                                                         n_centers(params.clusters),
+                                                                                         clusters(params.clusters),
+                                                                                         assignments_vec(dataset->size()),
+                                                                                         dataset(dataset),
+                                                                                         mean_df(dF::mean_df_between_curves(*dataset)),
+                                                                                         eng(chrono::system_clock::now().time_since_epoch().count()),
+                                                                                         uid(0, dataset->size() - 1) {}
+>>>>>>> b9f060b5448162ff1012a7d4b50b0b0c557c2bae
 
         void initialize_pp()
         {
-            cout << "init " << endl;
-
             // pick first centroid at random
             int rcentroid_index = this->uid(eng);
             centers.push_back((*dataset)[rcentroid_index].data);
@@ -130,7 +147,6 @@ namespace curve_cluster
                 std::vector<double> p(dataset->size(), 0.0); // probabilities of points to be chosen as next centroid
 
                 this->calculate_min_dists(d, dist_sum); // calculate min distance of all points to the closest centroid for them
-                // cout << "SUM (after normalization) = " << dist_sum << endl;
 
                 this->calculate_probs(d, dist_sum, p); // calculate probability of each point to be chosen as next centroid
                 double sum_prob = 0.0;
@@ -148,7 +164,6 @@ namespace curve_cluster
          Stores both the current assignments and the current clusters in "assignments_vec" and "clusters" attributes respectively */
         void Lloyds_assignment()
         {
-            // cout << "assign " << clusters.size() << endl;
             int nearest_cntr;
             for (int i = 0; i < this->dataset->size(); ++i)
             {
@@ -159,11 +174,8 @@ namespace curve_cluster
                 double min_d = dF::discrete_frechet_for_data(this->centers[0], (*dataset)[i].data);
                 nearest_cntr = 0;
 
-                // cout << centers.size() << endl;
-
                 for (int c = 1; c < centers.size(); ++c)
                 {
-                    // cout << c << endl;
                     double next_d = dF::discrete_frechet_for_data(this->centers[c], (*dataset)[i].data);
                     if (next_d < min_d)
                     {
@@ -172,11 +184,8 @@ namespace curve_cluster
                     }
                 }
 
-                // cout << "bef pushback " << nearest_cntr << endl;
                 this->assignments_vec[i] = nearest_cntr;
-                // cout << "bef pushback 2 " << assignments_vec[i] << endl;
                 this->clusters[nearest_cntr].push_back((*dataset)[i]); // push it into a cluster based on assigned center
-                // cout << "aft pushback " << endl;
                 (*dataset)[i].cluster = nearest_cntr;
             }
         }
@@ -253,9 +262,8 @@ namespace curve_cluster
         }
 
         // update step of clustering for curves by calculation of mean curve
-        void update_curve_centers()
+        void update_centers()
         {
-            cout << "update " << endl;
             // we must calculate mean per cluster and make it the new center
             for (int i = 0; i < centers.size(); ++i)
             {
@@ -263,24 +271,23 @@ namespace curve_cluster
             }
         }
 
-        void perform_Lloyds(int max_iter)
+        void Classic_Clustering(int max_iter)
         {
-            cout << "perf lloyds " << endl;
             int iter = 1; // iterations
             this->initialize_pp();
 
             this->Lloyds_assignment();
-            this->update_curve_centers();
+            this->update_centers();
 
-            for (int i = 0; i < clusters.size(); i++)
-            {
-                std::cout << "CLUSTER " << i << std::endl;
-                for (int j = 0; j < clusters[i].size(); j++)
-                {
-                    std::cout << clusters[i][j].id << " ";
-                }
-                std::cout << std::endl;
-            }
+            // for (int i = 0; i < clusters.size(); i++)
+            // {
+            //     std::cout << "CLUSTER " << i << std::endl;
+            //     for (int j = 0; j < clusters[i].size(); j++)
+            //     {
+            //         std::cout << clusters[i][j].id << " ";
+            //     }
+            //     std::cout << std::endl;
+            // }
 
             vector<int> last_assignments(this->assignments_vec.size());
             do
@@ -292,50 +299,49 @@ namespace curve_cluster
                 }
 
                 this->Lloyds_assignment();
-                this->update_curve_centers();
+                this->update_centers();
                 iter++;
                 // iterate until assignments don't change or until we reach max_iter threshold
             } while ((!equal(assignments_vec.begin(), assignments_vec.end(), last_assignments.begin())) && iter < max_iter);
 
-            std::cout << "AFTER LLOYDS " << std::endl;
-            for (int i = 0; i < clusters.size(); i++)
-            {
-                std::cout << "CLUSTER " << i << std::endl;
-                for (int j = 0; j < clusters[i].size(); j++)
-                {
-                    std::cout << clusters[i][j].id << " ";
-                }
-                std::cout << std::endl;
-            }
+            // std::cout << "AFTER LLOYDS " << std::endl;
+            // for (int i = 0; i < clusters.size(); i++)
+            // {
+            //     std::cout << "CLUSTER " << i << std::endl;
+            //     for (int j = 0; j < clusters[i].size(); j++)
+            //     {
+            //         std::cout << clusters[i][j].id << " ";
+            //     }
+            //     std::cout << std::endl;
+            // }
 
             cout << "............................................" << endl;
             cout << "Lloyd's algorithm ended after " << iter << " iterations" << endl;
         }
 
-        void Reverse_Assignment_Clustering(int max_iterations)
+        void Reverse_Assignment_LSH_Clustering(int max_iterations)
         {
             double delta = delta_tuning(*dataset);
 
             // we must construct a discrete Frechet LSH object to pass as parameter in the assignment algorithm
             dFLSH::LSH *dflsh_object = new dFLSH::LSH(dataset, params.L, delta, 8);
 
-            cout << "perf reverse " << endl;
             int iter = 1; // iterations
 
             this->initialize_pp();
             Range_dfLSH_assignment(*dflsh_object);
-            update_curve_centers();
+            update_centers();
             vector<vector<curves::Point2d>> old_centers = this->centers;
 
-            for (int i = 0; i < clusters.size(); i++)
-            {
-                std::cout << "CLUSTER " << i << std::endl;
-                for (int j = 0; j < clusters[i].size(); j++)
-                {
-                    std::cout << clusters[i][j].id << " ";
-                }
-                std::cout << std::endl;
-            }
+            // for (int i = 0; i < clusters.size(); i++)
+            // {
+            //     std::cout << "CLUSTER " << i << std::endl;
+            //     for (int j = 0; j < clusters[i].size(); j++)
+            //     {
+            //         std::cout << clusters[i][j].id << " ";
+            //     }
+            //     std::cout << std::endl;
+            // }
 
             do
             {
@@ -345,21 +351,21 @@ namespace curve_cluster
                     (*dataset)[i].marked = false;
                 Range_dfLSH_assignment(*dflsh_object);
                 old_centers = centers;
-                update_curve_centers();
+                update_centers();
                 iter++;
 
-                cout << iter << " " << dF::max_centers_displacement(centers, old_centers) << endl;
+                // cout << iter << " " << dF::max_centers_displacement(centers, old_centers) << endl;
             } while ((iter < max_iterations) && (dF::max_centers_displacement(centers, old_centers) > 1.0));
-            
-            for (int i = 0; i < clusters.size(); i++)
-            {
-                std::cout << "CLUSTER " << i << std::endl;
-                for (int j = 0; j < clusters[i].size(); j++)
-                {
-                    std::cout << clusters[i][j].id << " ";
-                }
-                std::cout << std::endl;
-            }
+
+            // for (int i = 0; i < clusters.size(); i++)
+            // {
+            //     std::cout << "CLUSTER " << i << std::endl;
+            //     for (int j = 0; j < clusters[i].size(); j++)
+            //     {
+            //         std::cout << clusters[i][j].id << " ";
+            //     }
+            //     std::cout << std::endl;
+            // }
 
             cout << "............................................" << endl;
             cout << "Reverse Assignment Cluestering ended after " << iter << " iterations" << endl;
@@ -368,7 +374,7 @@ namespace curve_cluster
         // Silhouette of object at index i
         double silhouette(curves::Curve2d &curve)
         {
-            vector<curves::Curve2d> * cluster = &(clusters[curve.cluster]); // find out at which cluster this item is assigned to
+            vector<curves::Curve2d> *cluster = &(clusters[curve.cluster]); // find out at which cluster this item is assigned to
 
             //  calculate a(i) = average distance of i to objects in same cluster
             vector<double> distances;
