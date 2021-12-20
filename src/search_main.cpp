@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
             cF::filter_curves(*curves_queryset, 2*params.delta);
 
             // perform LSH for continuous Frechet
-            cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, params.delta, 2);
+            cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, params.delta, 4);
 
             std::cout << "Searching for the approximate nearest neighbors of the query curves..." << std::endl;
             ofstream output_file;
