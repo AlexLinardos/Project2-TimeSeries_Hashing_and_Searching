@@ -4,6 +4,7 @@
 #include "../ui/Clustering_interface.hpp"
 #include "../TimeSeries-Clustering/initialization.hpp"
 #include "../TimeSeries-Clustering/assignment.hpp"
+#include "../TimeSeries-Clustering/update.hpp"
 #include "../TimeSeries-ANN/L2/LSH.hpp"
 #include "../TimeSeries-ANN/L2/HC.hpp"
 
@@ -28,10 +29,12 @@ int main(int argc, char *argv[])
 
     if (lc(params.update) == "mean vector")
     {
+        // INITIALIZATION STEP
         std::cout << "Initializing centroids..." << std::endl;
         init::VectorInitializer initializer = init::VectorInitializer(params.clusters, (*dataset), (*dataset)[0].xij.size());
         std::vector<Item> centroids = initializer.initialize_pp();
 
+        // ASSIGNMENT STEP
         std::cout << "Clustering..." << std::endl;
         assign::VectorAssignor assignor = assign::VectorAssignor(params.clusters, centroids, (*dataset), (*dataset)[0].xij.size());
         if (lc(params.assignment) == "classic")
@@ -90,6 +93,24 @@ int main(int argc, char *argv[])
                 std::cout << std::endl;
             }
         }
+
+        // UPDATE STEP
+        std::cout << "------------------------------------" << endl;
+        std::cout << "Current centers are: " << endl;
+        for (int i = 0; i < assignor.centers.size(); i++)
+        {
+            std::cout << assignor.centers[i].id << " ";
+            std::cout << std::endl;
+        }
+        updt::update_vector_centers((*dataset), assignor.centers, assignor.clusters);
+        std::cout << "------------------------------------" << endl;
+        std::cout << "Updated centers. New centers are: " << endl;
+        // print results
+        for (int i = 0; i < assignor.centers.size(); i++)
+        {
+            std::cout << assignor.centers[i].id << " ";
+            std::cout << std::endl;
+        }
     }
     if (lc(params.update) == "mean frechet")
     {
@@ -107,10 +128,12 @@ int main(int argc, char *argv[])
             curves_dataset->push_back(curves::Curve2d((*dataset)[i].id, t_dimension, (*dataset)[i].xij));
         }
 
+        // INITIALIZATION STEP
         std::cout << "Initializing centroids..." << std::endl;
         init::CurveInitializer initializer = init::CurveInitializer(params.clusters, (*curves_dataset));
         std::vector<curves::Curve2d> centroids = initializer.initialize_pp();
 
+        // ASSIGNMENT STEP
         std::cout << "Clustering..." << std::endl;
         assign::CurveAssignor assignor = assign::CurveAssignor(params.clusters, centroids, (*curves_dataset));
         if (lc(params.assignment) == "classic")
@@ -147,6 +170,8 @@ int main(int argc, char *argv[])
             }
             delete dflsh_object;
         }
+
+        // UPDATE STEP
     }
 
     return 0;

@@ -16,11 +16,11 @@ namespace assign
     class VectorAssignor
     {
     private:
-        int n_centers;               // number of centers/clusters
-        std::vector<Item> dataset;   // a dataset of vectors
-        int dimensions;              // dimensions of vectors in the dataset
-        vector<int> assignments_vec; // shows the cluster to which each vector is assigned to
-                                     // (example: if assignments[4]=2 then item at index 4 of dataset is assigned to cluster at index 2)
+        int n_centers;                    // number of centers/clusters
+        std::vector<Item> dataset;        // a dataset of vectors
+        int dimensions;                   // dimensions of vectors in the dataset
+        std::vector<int> assignments_vec; // shows the cluster to which each vector is assigned to
+                                          // (example: if assignments[4]=2 then item at index 4 of dataset is assigned to cluster at index 2)
 
         // helper method that calculates starting radius for Reverse Assignment algorithms, which is min(dist between centers)/2
         double calculate_start_radius()
@@ -44,8 +44,8 @@ namespace assign
         }
 
     public:
-        std::vector<Item> centers;     // cluster centers (constructor receives them initialized)
-        vector<vector<Item>> clusters; // the clusters of items
+        std::vector<Item> centers;          // cluster centers (constructor receives them initialized)
+        std::vector<vector<Item>> clusters; // the clusters of items
         VectorAssignor(int n_centers, std::vector<Item> centers, std::vector<Item> dataset, int dimensions) : n_centers(n_centers),
                                                                                                               centers(centers),
                                                                                                               dataset(dataset),
@@ -227,7 +227,7 @@ namespace assign
     private:
         int n_centers;                        // number of centers/clusters
         std::vector<curves::Curve2d> dataset; // a dataset of curves
-        vector<int> assignments_vec;          // shows the cluster to which each curve is assigned to
+        std::vector<int> assignments_vec;     // shows the cluster to which each curve is assigned to
                                               // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
 
         // helper method that calculates starting radius for Reverse Assignment algorithms, which is min(dist between centers)/2
@@ -252,8 +252,8 @@ namespace assign
         }
 
     public:
-        std::vector<curves::Curve2d> centers;     // cluster centers (constructor receives them initialized)
-        vector<vector<curves::Curve2d>> clusters; // the clusters of curves
+        std::vector<curves::Curve2d> centers;          // cluster centers (constructor receives them initialized)
+        std::vector<vector<curves::Curve2d>> clusters; // the clusters of curves
 
         CurveAssignor(int n_centers, std::vector<curves::Curve2d> centers, std::vector<curves::Curve2d> dataset) : n_centers(n_centers),
                                                                                                                    centers(centers),
