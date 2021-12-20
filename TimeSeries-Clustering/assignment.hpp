@@ -307,7 +307,7 @@ namespace assign
                 {
                     // perform LSH Range Search
                     std::vector<std::pair<curves::Curve2d *, double>> r_search;
-                    r_search = dflsh.RangeSearch(this->centers[c], radius, 0);
+                    r_search = dflsh.RangeSearch(this->centers[c].data, radius, 0);
 
                     // if ball found new items
                     if (r_search.size() > 0)

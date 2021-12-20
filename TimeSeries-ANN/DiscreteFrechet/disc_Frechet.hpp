@@ -114,7 +114,7 @@ namespace dF
     }
 
     // calculates discrete Frechet distance between only the data attribute of two curves (returns only final value)
-    double discrete_frechet_for_data(const std::vector<curves::Point2d> &p, const std::vector<curves::Point2d> &q)
+    double discrete_frechet_for_data(std::vector<curves::Point2d> &p, std::vector<curves::Point2d> &q)
     {
         int pl = p.size();
         int ql = q.size();

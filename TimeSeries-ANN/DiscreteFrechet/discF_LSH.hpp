@@ -133,6 +133,34 @@ namespace dFLSH
             return clean_pis;
         }
 
+        // maps curve's data to a grid
+        vector<curves::Point2d> produce_h_for_data(vector<curves::Point2d> &curve, double tx, double ty)
+        {
+            int starting_size = curve.size();
+            vector<curves::Point2d> snap_pis; // pi'
+
+            // follow <<xi' = floor((x-t)/δ + 1/2)*δ + t>> formula to perform snapping
+            for (int i = 0; i < starting_size; i++)
+            {
+                double snap_x = floor((curve[i].x - tx) / this->delta + 0.5) * this->delta + tx;
+                double snap_y = floor((curve[i].y - ty) / this->delta + 0.5) * this->delta + ty;
+                snap_pis.push_back(curves::Point2d(snap_x, snap_y));
+            }
+
+            // create new vector without consecutive duplicates
+            vector<curves::Point2d> clean_pis;
+            clean_pis.push_back(snap_pis[0]);
+            for (int i = 1; i < starting_size; i++)
+            {
+                if ((snap_pis[i].x != clean_pis.back().x) || (snap_pis[i].y != clean_pis.back().y))
+                {
+                    clean_pis.push_back(snap_pis[i]);
+                }
+            }
+
+            return clean_pis;
+        }
+
         // concatenates points of grid-curve to produce a (real) vector x
         vector<double> concat_points(vector<curves::Point2d> points)
         {
@@ -290,18 +318,18 @@ namespace dFLSH
         }
 
         // performs the LSH range search algorithm to find nearest neighbours of query in a given radius (using discrete Frechet distance)
-        std::vector<std::pair<curves::Curve2d *, double>> RangeSearch(curves::Curve2d &query, double radius, int threshold = 0)
+        std::vector<std::pair<curves::Curve2d *, double>> RangeSearch(vector<curves::Point2d> &query, double radius, int threshold = 0)
         {
             std::vector<std::pair<curves::Curve2d *, double>> neighbours;
 
-            int starting_size = query.data.size();
+            int starting_size = query.size();
 
             int searched = 0; // will be used to check if we reached threshold of checks
             // for each hash table
             for (int i = 0; i < this->L; i++)
             {
                 // snap query it to grid
-                vector<curves::Point2d> grid_curve = this->produce_h(query, this->shifts[i].first, this->shifts[i].second);
+                vector<curves::Point2d> grid_curve = this->produce_h_for_data(query, this->shifts[i].first, this->shifts[i].second);
                 int new_size = grid_curve.size();
 
                 // produce vector x
@@ -319,7 +347,7 @@ namespace dFLSH
                 }
 
                 // create Item object so we can use produce_g from previous project
-                Item *item_for_g = new Item(query.id, x_vec);
+                Item *item_for_g = new Item("x_vec", x_vec);
 
                 // find the bucket
                 long unsigned id = this->g_family->produce_g(*item_for_g);
@@ -337,7 +365,7 @@ namespace dFLSH
                         assigned to a cluster so the next range search doesn't check them.*/
                         if ((this->hashTables[i][bucket][j].curve->id != neighbours[a].first->id) && (this->hashTables[i][bucket][j].curve->marked == false))
                         {
-                            double dfd = dF::discrete_frechet(*(this->hashTables[i][bucket][j].curve), query);
+                            double dfd = dF::discrete_frechet_for_data(this->hashTables[i][bucket][j].curve->data, query);
                             // if curve is in radius
                             if (dfd < radius)
                             {
