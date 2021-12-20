@@ -99,7 +99,10 @@ int main(int argc, char *argv[])
         std::cout << "Current centers are: " << endl;
         for (int i = 0; i < assignor.centers.size(); i++)
         {
-            std::cout << assignor.centers[i].id << " ";
+            for (int j = 0; j < 10; j++)
+            {
+                std::cout << assignor.centers[i].xij[j] << " ";
+            }
             std::cout << std::endl;
         }
         updt::update_vector_centers((*dataset), assignor.centers, assignor.clusters);
@@ -108,7 +111,10 @@ int main(int argc, char *argv[])
         // print results
         for (int i = 0; i < assignor.centers.size(); i++)
         {
-            std::cout << assignor.centers[i].id << " ";
+            for (int j = 0; j < 10; j++)
+            {
+                std::cout << assignor.centers[i].xij[j] << " ";
+            }
             std::cout << std::endl;
         }
     }
