@@ -57,8 +57,6 @@ int main(int argc, char *argv[])
 
         output_file << "Algorithm: " << params.assignment << " " << params.update << endl;
 
-        cout << "[BUILDING OUTPUT]" << endl;
-
     if (params.complete)
     {
         for (int i = 0; i < params.clusters; i++)
@@ -89,21 +87,25 @@ int main(int argc, char *argv[])
         }
     }
 
-    cout << "[CALCULATING SILHOUETTE]" << endl;
-    if (c->centers.size() > 1)
+    if (params.silhouette == true)
     {
-        output_file << "clustering_time: " << elapsed << endl;
-        output_file << "Silhouette: [";
-        for (int i = 0; i < params.clusters; i++)
+
+        cout << "[CALCULATING SILHOUETTE]" << endl;
+        if (c->centers.size() > 1)
         {
-            // cout << i << endl;
-            output_file << c->eval_specific_cluster(i) << ", ";
+            output_file << "clustering_time: " << elapsed << endl;
+            output_file << "Silhouette: [";
+            for (int i = 0; i < params.clusters; i++)
+            {
+                // cout << i << endl;
+                output_file << c->eval_specific_cluster(i) << ", ";
+            }
+            output_file << c->eval_clustering() << "]" << endl;
         }
-        output_file << c->eval_clustering() << "]" << endl;
-    }
-    else
-    {
-        cout << "Silhouette can only be computed when there are 2 or more clusters." << endl;
+        else
+        {
+            cout << "Silhouette can only be computed when there are 2 or more clusters." << endl;
+        }
     }
 
         output_file.close();
@@ -182,21 +184,24 @@ int main(int argc, char *argv[])
             }
         }
 
-        cout << "[CALCULATING SILHOUETTE] (This step takes a couple of minutes)" << endl;
-        if (params.clusters > 1)
+        if (params.silhouette == true)
         {
-            output_file << "clustering_time: " << elapsed << endl;
-            output_file << "Silhouette: [";
-            for (int i = 0; i < params.clusters; i++)
+            cout << "[CALCULATING SILHOUETTE] (This step takes a couple of minutes)" << endl;
+            if (params.clusters > 1)
             {
-                // cout << i << endl;
-                output_file << c->eval_specific_cluster(i) << ", ";
+                output_file << "clustering_time: " << elapsed << endl;
+                output_file << "Silhouette: [";
+                for (int i = 0; i < params.clusters; i++)
+                {
+                    // cout << i << endl;
+                    output_file << c->eval_specific_cluster(i) << ", ";
+                }
+                output_file << c->eval_clustering() << "]" << endl;
             }
-            output_file << c->eval_clustering() << "]" << endl;
-        }
-        else
-        {
-            cout << "Silhouette can only be computed when there are 2 or more clusters." << endl;
+            else
+            {
+                cout << "Silhouette can only be computed when there are 2 or more clusters." << endl;
+            }
         }
 
         output_file.close();
