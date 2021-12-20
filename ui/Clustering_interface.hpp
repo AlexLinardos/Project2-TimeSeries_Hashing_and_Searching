@@ -213,8 +213,8 @@ namespace Cli
                 this->input_f = "../datasets/nasd_input.csv";
                 this->conf_f = "../cluster.conf";
                 this->output_f = "output.txt";
-                this->update = "Mean frechet";    // Mean Frechet - Mean Vector
-                this->assignment = "LSH_Frechet"; // Classic - LSH - Hypercube - LSH_Frechet
+                this->update = "Mean vector"; // Mean Frechet - Mean Vector
+                this->assignment = "Classic"; // Classic - LSH - Hypercube - LSH_Frechet
                 this->complete = false;
                 this->silhouette = false;
                 if (this->read_config() == -1) // read the configuration file
