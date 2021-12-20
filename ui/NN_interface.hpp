@@ -70,11 +70,11 @@ namespace NNi
         /* Sets default value to corresponding command line parameter.
             Default value of parameter k changes according to algorithm.
             Prints error message on failure. */
-        void set_default(std::string param, std::string algo)
+        void set_default(std::string param, std::string algo_lc)
         {
             if (param == "-k")
             {
-                if (algo == "LSH")
+                if (algo_lc == "lsh")
                 {
                     this->k = 4;
                     this->param_set.find(param)->second = "4";
@@ -99,6 +99,11 @@ namespace NNi
             {
                 this->probes = 2;
                 this->param_set.find(param)->second = "2";
+            }
+            else if (param == "-delta")
+            {
+            	this->delta = 0.0;
+            	this->param_set.find(param)->second = "0.0";
             }
             else
             {
@@ -147,15 +152,25 @@ namespace NNi
                 // if a parameter has no value see if it can be set to a default
                 if (it->second == "none")
                 {
-                    if ((curr_key == "-k") || (curr_key == "-L") || (curr_key == "-M") || (curr_key == "-probes"))
+                    if ((curr_key == "-k") || (curr_key == "-L") || (curr_key == "-M") || (curr_key == "-probes") || (curr_key == "-delta"))
                     {
-                        this->set_default(curr_key, algo);
+                        this->set_default(curr_key, algo_lc);
                         std::cout << "Parameter " << curr_key << " has been set to default value." << std::endl;
                     }
                     else
                     {
+                        if (curr_key == "-metric")
+                    	{
+                    		if (algo_lc == "-frechet")
+                    		{
+                    			std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
+                        		return -1;
+                    		}
+                    	}
+                    	else {
                         std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
                         return -1;
+                        }
                     }
                 }
                 // else set the value while doing type conversion if needed
@@ -189,19 +204,25 @@ namespace NNi
                 // if a parameter has no value see if it can be set to a default
                 if (it->second == "none")
                 {
-                    if ((curr_key == "-k") || (curr_key == "-L") || (curr_key == "-M") || (curr_key == "-probes"))
+                    if ((curr_key == "-k") || (curr_key == "-L") || (curr_key == "-M") || (curr_key == "-probes") || (curr_key == "-delta"))
                     {
-                        this->set_default(curr_key, algo);
+                        this->set_default(curr_key, algo_lc);
                         std::cout << "Parameter " << curr_key << " has been set to default value." << std::endl;
-                    }
-                    else if (curr_key == "-delta")
-                    {
-                        this->param_set.find("-delta")->second = "0.0";
                     }
                     else
                     {
+                    	if (curr_key == "-metric")
+                    	{
+                    		if (algo_lc == "-frechet")
+                    		{
+                    			std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
+                        		return -1;
+                    		}
+                    	}
+                    	else {
                         std::cout << "[INPUT ERROR] Could not find value for mandatory parameter " << curr_key << "." << std::endl;
                         return -1;
+                        }
                     }
                 }
                 it++;
