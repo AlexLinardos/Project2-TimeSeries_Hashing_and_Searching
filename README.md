@@ -80,7 +80,7 @@ Frechet or Mean Vector> –assignment <Classic or LSH or Hypercube or LSH_Freche
 
 __Examples :__
 
-1. `./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm LSH`
+1. ./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -k 1 -L 1 -o outputs/output.txt -algorithm LSH
 2. `./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -o outputs/output.txt -algorithm Frechet -metric discrete -delta 2.0`
 3. `./bin/cluster -i datasets/nasd_input.csv -c cluster.conf -o outputs/output.txt -update Mean Vector -assignment Classic`
 4. `./bin/cluster -i datasets/nasd_input.csv -c cluster.conf -o outputs/output.txt -update Mean Frechet -assignment LSH_Frechet -complete -silhouette`
@@ -156,6 +156,8 @@ Performance tests per method:<br>
 * __LSH/Hypercube for vectors__ : As expected, these methods did not perform as good as they did in our previous project. While they are not unusable (they finish slightly faster than the brute force method without being too far off), it is pretty clear that the complexity of the curves requires a different approach in order to have satisfying results.
 * __LSH for curves with discrete Frechet__ : Definitely an upgrade compare to the previous method and certainly the best overall. This method performs a lot faster than the brute force method and reliably returns great approximations.
 * __LSH for curves with continuous Frechet__ : While incredibly accurate, this method is extremely slow. Its low speed maybe caused by the complexity of the metric, as well as the fact that we were indicated to use "black box" functions to call the already implemented code that was provided to us (Fred folder). Even after a lot of filtering to reduce the complexity of the curves, the algorithm remains pretty slow.
+
+./bin/search -i datasets/nasd_input.csv -q datasets/nasd_query.csv -k 1 -L 1 -o outputs/output.txt -algorithm LSH
 
 
 

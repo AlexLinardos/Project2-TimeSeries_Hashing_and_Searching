@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-O3
 CXXFLAGS = -march=native -Ofast -static-libgcc -static-libstdc++ -std=c++14 -fpermissive -fPIC -ffast-math -fno-trapping-math -ftree-vectorize
 
-all: search cluster
+all: final_search final_cluster clean1
 
 search: final_search clean1
 
@@ -35,7 +35,7 @@ cluster: final_cluster clean1
 final_cluster: cluster_main.o
 	$(CC) cluster_main.o -o bin/cluster $(CFLAGS)
 
-cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp ./TimeSeries-Clustering/initialization.hpp
+cluster_main.o: ./src/cluster_main.cpp ./ui/Clustering_interface.hpp ./TimeSeries-Clustering/initialization.hpp ./TimeSeries-Clustering/assignment.hpp ./TimeSeries-Clustering/update.hpp ./TimeSeries-ANN/L2/LSH.hpp ./TimeSeries-ANN/L2/HC.hpp
 	$(CC) -c ./src/cluster_main.cpp $(CFLAGS) $(CXXFLAGS)
 
 clean:

@@ -9,7 +9,7 @@
 namespace updt
 {
     // update step of clustering for vectors by calculation of mean vector
-    void update_vector_centers(std::vector<Item> &dataset, std::vector<Item> &centers, std::vector<vector<Item>> clusters)
+    void update_vector_centers(std::vector<Item> &dataset, std::vector<Item> &centers, std::vector<vector<Item>> &clusters)
     {
         int v_dimension = dataset[0].xij.size();
         // we must calculate mean per cluster and make it the new center
@@ -29,7 +29,7 @@ namespace updt
     }
 
     // update step of clustering for curves by calculation of mean curve
-    void update_curve_centers(std::vector<curves::Curve2d> &dataset, std::vector<curves::Curve2d> &centers, std::vector<vector<curves::Curve2d>> clusters)
+    void update_curve_centers(std::vector<curves::Curve2d> &dataset, std::vector<curves::Curve2d> &centers, std::vector<vector<curves::Curve2d>> &clusters)
     {
         // we must calculate mean per cluster and make it the new center
         for (int i = 0; i < centers.size(); ++i)
