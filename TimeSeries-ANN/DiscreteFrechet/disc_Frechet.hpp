@@ -181,5 +181,43 @@ namespace dF
         }
         return curr_NN;
     }
+
+    double mean_df_between_curves(std::vector<curves::Curve2d> &curves)
+    {
+        std::random_device rd;                                          // only used once to initialise (seed) engine
+        std::mt19937 rng(rd());                                         // random-number engine used (Mersenne-Twister in this case)
+        std::uniform_int_distribution<int> uni(0, curves.size() - 1); // guaranteed unbiased
+        int item_index_1;
+        int item_index_2;
+        double distance = 0;
+        /* 
+            For curves.size()/4 samples we randomly choose two curves and calculate their discrete frechet distance.
+            We sum these disances and calculate the average. 
+        */
+        for (int i = 0; i < curves.size() / 4; i++)
+        {
+            item_index_1 = uni(rng);
+            item_index_2 = uni(rng);
+            while (item_index_1 == item_index_2)
+                item_index_2 = uni(rng);
+            distance += dF::discrete_frechet(curves[item_index_1], curves[item_index_2]) / (double)(curves.size() / 4);
+        }
+
+        return distance;
+    }
+
+    double max_centers_displacement(std::vector<vector<curves::Point2d>> &cur_centers, std::vector<vector<curves::Point2d>> &old_centers)
+    {
+        double max = 0.0;
+        double displacement = 0.0;
+
+        for(int i=0; i<cur_centers.size(); i++)
+        {
+            displacement = discrete_frechet_for_data(cur_centers[i], old_centers[i]);
+            if(displacement > max)
+                max = displacement;
+        }
+        return max;
+    }
 }
 #endif

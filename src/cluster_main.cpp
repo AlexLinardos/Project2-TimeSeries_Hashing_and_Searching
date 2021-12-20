@@ -138,7 +138,8 @@ int main(int argc, char *argv[])
         cout << "hello " << params.clusters << endl;
 
         curve_cluster::Clustering * c = new curve_cluster::Clustering(params, curves_dataset);
-        c->perform_Lloyds(20);
+        // c->perform_Lloyds(20);
+        c->Reverse_Assignment_Clustering(20);
 
         // // INITIALIZATION STEP
         // std::cout << "Initializing centroids..." << std::endl;

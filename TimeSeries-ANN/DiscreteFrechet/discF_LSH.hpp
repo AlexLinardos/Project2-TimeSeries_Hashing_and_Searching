@@ -53,28 +53,31 @@ namespace dFLSH
                                                                                                                              eng(time(0) + clock()),
                                                                                                                              urd(0.0, delta)
         {
-            // tune windowSize
-            std::random_device rd;                                          // only used once to initialise (seed) engine
-            std::mt19937 rng(rd());                                         // random-number engine used (Mersenne-Twister in this case)
-            std::uniform_int_distribution<int> uni(0, dataset->size() - 1); // guaranteed unbiased
-            int item_index_1;
-            int item_index_2;
-            double distance = 0;
-            /* For dataset->size()/4 samples we randomly choose two curves of the dataset and calculate their discrete frechet distance.
-                We sum these disances and calculate the average. Then we multiply that average distance by a factor of our choice and we
-                get the windowsize. That factor can be adjusted at search_main.cpp at the initialization of the LSH instance */
-            for (int i = 0; i < dataset->size() / 4; i++)
-            {
-                item_index_1 = uni(rng);
-                item_index_2 = uni(rng);
-                while (item_index_1 == item_index_2)
-                    item_index_2 = uni(rng);
-                distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
-            }
-            // this->windowSize = (int)floor(factor_for_windowSize * distance);
-            // std::cout << "windowSize: " << this->windowSize << std::endl;
+            // // tune windowSize
+            // std::random_device rd;                                          // only used once to initialise (seed) engine
+            // std::mt19937 rng(rd());                                         // random-number engine used (Mersenne-Twister in this case)
+            // std::uniform_int_distribution<int> uni(0, dataset->size() - 1); // guaranteed unbiased
+            // int item_index_1;
+            // int item_index_2;
+            // double distance = 0;
+            // /* For dataset->size()/4 samples we randomly choose two curves of the dataset and calculate their discrete frechet distance.
+            //     We sum these disances and calculate the average. Then we multiply that average distance by a factor of our choice and we
+            //     get the windowsize. That factor can be adjusted at search_main.cpp at the initialization of the LSH instance */
+            // for (int i = 0; i < dataset->size() / 4; i++)
+            // {
+            //     item_index_1 = uni(rng);
+            //     item_index_2 = uni(rng);
+            //     while (item_index_1 == item_index_2)
+            //         item_index_2 = uni(rng);
+            //     distance += (dF::discrete_frechet((*dataset)[item_index_1], (*dataset)[item_index_2])) / (double)(dataset->size() / 4);
+            // }
+            // // this->windowSize = (int)floor(factor_for_windowSize * distance);
+            // // std::cout << "windowSize: " << this->windowSize << std::endl;
 
-            this->g_family = new G(4, this->tableSize, distance, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
+            double windowSize = dF::mean_df_between_curves(*dataset);
+            cout << "w " << windowSize << endl;
+
+            this->g_family = new G(4, this->tableSize, windowSize, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
 
             // Initialize L hashTables, Grids(shifted_deltas)
             hashTables = new std::vector<Association> *[L];
