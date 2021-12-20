@@ -1,3 +1,6 @@
+#ifndef MEAN_CURVES_HPP
+#define MEAN_CURVES_HPP
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -127,3 +130,5 @@ std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
     cF::filter_curve(curves_points[0], 2.0);
     return curves_points[0];
 }
+
+#endif
