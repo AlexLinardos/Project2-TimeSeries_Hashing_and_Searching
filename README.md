@@ -130,11 +130,12 @@ In this section we will analyse our code file-by-file and talk about any possibl
 
 ## Optimization experiments and parameter tuning
 
-__Quering trick__ (for Frechet methods): When we find the hash bucket of the query, we check the bucket for the existance of identical grid-curves so as to skip the calculation of the Frechet distance for the non-identical ones. We implemented this trick to speed up the procedure but there was no noticable improvement (at least for our dataset). We believe that maybe this trick can help with the continuous Frechet method but testing and evaluating this enough to get concrete results was hard at the given time. That said, the current implementation of the program runs without the quering trick but there is always the option to use it by setting the parameter "quering_trick"  of the search_ANN() methods to the boolean value "true".
+__Quering trick__ (for Frechet methods): When we find the hash bucket of the query, we check the bucket for the existance of identical grid-curves so as to skip the calculation of the Frechet distance for the non-identical ones. We implemented this trick to speed up the procedure but there was no noticable improvement (at least for our dataset) for the Discrete Frechet ANN approach as the calculation of the metric is fast enough. That said, the current implementation of the Discrete Frechet ANN runs without the querying trick but there is always the option to use it by calling the search_ANN() method with the "quering_trick" boolean parameter set to "true" (from search_main.cpp). 
+We believe that this trick can be of help, at the Continuous Frechet ANN approach in order to avoid the demanding calculation of the metric, but testing and evaluating this enough to have concrete proof was hard due to the continuous frechet calculation being slow. That said, the current implementation of the Continuous Frechet ANN runs with the querying trick on.
 
 __Padding__ : To be able to use the LSH for vectors method we had to apply padding (meaning to replace any points that were cut) to the grid-curves in order to have all the vectors be of the same length. We chose to use the value 10000 for the padding. If you wish to use another dataset keep in mind that it would be best to replace that value with a value big enough to be outside of the range of values in your dataset.
 
-__Delta tuning__: When not given by the user, this parameter is computed automatically by the program according to the given data so as to approximate the mean distance between two concective vertices in the curves of the dataset. In order to achieve that, the delta_tuning() function (located in curves.hpp) selects random curve pairs, sums the mean distances of their vertices and calculates the average value for all pairs. The number of pairs is chose randomly.
+__Delta tuning__: When not given by the user, this parameter is computed automatically by the program according to the given data so as to approximate the mean distance between two concective vertices in the curves of the dataset. In order to achieve that, the delta_tuning() function (located in curves.hpp), for a number of iterations, selects random curve pairs, sums the mean distances of their vertices and calculates the average value for all pairs.
 
 ### Best parameters for each algorithm
 After experimenting we concluded that the best parameters for each algorithm are as follows:<br>
@@ -142,7 +143,6 @@ After experimenting we concluded that the best parameters for each algorithm are
 * *Hypercube*: k=1. M=30, probes=1, w=average L2 distance between dataset curves (as vectors)
 * *discrete Frechet LSH* : L=6, delta=avg dist between curve vertices, tablesize=dataset_size/8, threshold=dataset_size/4, querying trick=false
 * *continuous Frechet LSH* : L=1, delta=avg dist between curve vertices, tablesize=dataset_size/4, threshold=dataset_size/4, querying trick=true
-
 
 ## Evaluation and final thoughts
 
@@ -154,8 +154,8 @@ For the nearest neighbour search we used the following metrics to evaluate the p
 
 Performance tests per method:<br>
 * __LSH/Hypercube for vectors__ : As expected, these methods did not perform as good as they did in our previous project. While they are not unusable (they finish slightly faster than the brute force method without being too far off), it is pretty clear that the complexity of the curves requires a different approach in order to have satisfying results.
-* __LSH for curves with discrete Frechet__ : Definitely an upgrade compare to the previous method and possibly the best overall. This method performs a lot faster than the brute force method and reliably returns great approximations.
-*__LSH for curves with continuous Frechet__ : While incredibly accurate, this method is extremely slow. Its low speed maybe caused by the complexity of the metric, as well as the fact that the code is used as a black box. Even after a lot of filtering to reduce the dimensionality of the curves, the algorithm remains pretty slow.
+* __LSH for curves with discrete Frechet__ : Definitely an upgrade compare to the previous method and certainly the best overall. This method performs a lot faster than the brute force method and reliably returns great approximations.
+* __LSH for curves with continuous Frechet__ : While incredibly accurate, this method is extremely slow. Its low speed maybe caused by the complexity of the metric, as well as the fact that we were indicated to use "black box" functions to call the already implemented code that was provided to us (Fred folder). Even after a lot of filtering to reduce the complexity of the curves, the algorithm remains pretty slow.
 
 
 
