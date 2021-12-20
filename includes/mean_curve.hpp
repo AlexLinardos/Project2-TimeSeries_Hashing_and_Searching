@@ -81,8 +81,7 @@ std::vector<curves::Point2d> mean_curve(curves::Curve2d &p, curves::Curve2d &q)
 }
 
 // calculates the mean curve of multiple curves given in a std::vector using discrete Frechet distance
-std::vector<curves::Point2d>
-mean_of_curves(vector<curves::Curve2d> &curves)
+std::vector<curves::Point2d> mean_of_curves(vector<curves::Curve2d> &curves)
 {
     vector<vector<curves::Point2d>> curves_points;
     int i = 0;

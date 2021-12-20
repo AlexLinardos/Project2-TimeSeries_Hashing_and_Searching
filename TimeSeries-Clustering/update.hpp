@@ -29,21 +29,12 @@ namespace updt
     }
 
     // update step of clustering for curves by calculation of mean curve
-    void update_curve_centers(std::vector<curves::Curve2d> &dataset, std::vector<curves::Curve2d> &centers, std::vector<vector<curves::Curve2d>> &clusters)
+    void update_curve_centers(std::vector<curves::Curve2d> &dataset, std::vector<vector<curves::Point2d>> &centers, std::vector<vector<curves::Curve2d>> &clusters)
     {
         // we must calculate mean per cluster and make it the new center
         for (int i = 0; i < centers.size(); ++i)
         {
-            vector<double> mean(v_dimension, 0.0);
-            int T = clusters[i].size(); // number of objects in cluster
-
-            // calculate mean
-            for (int j = 0; j < T; ++j)
-            {
-                mean = vector_mean(mean, clusters[i][j].xij, v_dimension, T);
-            }
-
-            centers[i].xij = mean;
+            centers[i] = mean_of_curves(clusters[i]);
         }
     }
 }
