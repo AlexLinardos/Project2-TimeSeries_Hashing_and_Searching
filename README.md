@@ -11,7 +11,8 @@ Github repository: https://github.com/AlexLinardos/Project2-TimeSeries_Hashing_a
 * [Repository organisation](#repository-organisation)
 * [Compilation and execution instructions](#compilation-and-execution-instructions)
 * [In-depth Analysis](#in-depth-analysis)
-* [Final thoughts](#final-thoughts)
+* [Optimization experiments and parameter tuning](#optimization-experiments-and-parameter-tuning)
+* [Evaluation and final thoughts](#evaluation-and-final-thoughts)
 
 ## Repository organisation
 ### General
@@ -22,7 +23,7 @@ Github repository: https://github.com/AlexLinardos/Project2-TimeSeries_Hashing_a
 * __outputs/ :__ This directory contains output files with the results of some program runs.
  
 ### Code directories
-*For in-depth information about each file in these directories and the code please refer to the "In-depth Analysis" section further bellow.*
+*For in-depth information about each file in these directories and the code please refer to the [In-depth Analysis](#in-depth-analysis) section further bellow.*
 * __TimeSeries-ANN/ :__ Contains code files necessary to implement Approximate Nearest Neighbour search with three different distance metrics (L2, Discrete Frechet, Continuous Frechet).
 * __TimeSeries-Clustering/ :__
 * __src/ :__ Contains the source (.cpp) files for both ANN search and Clustering.
@@ -92,14 +93,16 @@ In this section we will analyse our code file-by-file and talk about any possibl
   This directory includes header files that implement the LSH and Hypercube projection methods for approximate nearest neighbour searching using euclidean distance as metric. They were implemented as part of a previous project so for more info please refer to the following GitHub repository: https://github.com/AlexLinardos/Project1-LSH-and-Clustering
 * #### TimeSeries-ANN/DiscreteFrechet
   1. __disc_Frechet.hpp__ : This header file contains a function -called discrete_frechet()- that *__computes the discrete Frechet distance__* between two curves that are given as parameters. The computation is done with dynamic programming via the function compute_c() that is included in the same file. It is important to note that discrete_frechet() returns the whole table of values that is computed with the dynamic programming approach and not just the final result. Also included in this file is function search_exactNN() that -given a query curve and a dataset- *__searches for the exact nearest neighbour of the query inside the dataset__*. It returns a pair that contains a pointer to the nearest neighbour curve found and the Frechet distance from the query. Note that this is a different function from the one with the same name that is included in the ContinuousFrechet directory as this one uses *discrete* Frechet distance as a metric (while the other uses continuous Frechet distance).
-  2. __discF_LSH.hpp__ : This header file contains the LSH class (see comments on code for explanation of each parameter of constructor). Upon creation, an object of this class has everything needed to *__hash and append each curve of a given dataset into multiple hash tables__* via the dataset_hashing() method. Note that the hash tables are filled with Association objects, which are triplets of a *curve*, its *grid curve* (produced by the produce_h() method) and the grid curve as a 1d *vector* (aka a flattened version that is produced by the concat_points() method). The produce_h() method uses random shifts distributed uniformly in [0, δ) to produce different grids (as many as the hash tables) and *__snap the curves__* onto them using the following formula: xi' = floor((x-t)/δ + 1/2)δ + t, yi' = floor((x-t)/δ + 1/2)δ + t, where δ is delta parameter and t is a randomized shift each time. After this procedure, the associations are stored by their vector into the 1d tables with the help of LSH for vectors. Finally, the search_ANN() method hashes a given query curve in the same way and then *__finds an approximate nearest neighbour__* of the query inside the dataset by searching the curves that are in the same hash bucket as itself and in all hash tables. The comparisons are done using discrete Frechet distance and the method returns a pair of a pointer to the approximately nearest curve and the discrete Frechet distance from it.<br><br>
+  2. __discF_LSH.hpp__ : This header file contains the LSH class (see comments on code for explanation of each parameter of constructor). Upon creation, an object of this class has everything needed to *__hash and append each curve of a given dataset into multiple hash tables__* via the dataset_hashing() method. Note that the hash tables are filled with Association objects, which are triplets of a *curve*, its *grid curve* (produced by the produce_h() method) and the grid curve as a 1d *vector* (aka a flattened version that is produced by the concat_points() method). The produce_h() method uses random shifts distributed uniformly in [0, δ) to produce different grids (as many as the hash tables) and *__snap the curves__* onto them using the following formula: xi' = floor((x-t)/δ + 1/2)δ + t, yi' = floor((x-t)/δ + 1/2)δ + t, where δ is delta parameter and t is a randomized shift each time. After this procedure, the associations are stored using their vector as key into the 1d tables with the help of LSH for vectors. Finally, the search_ANN() method hashes a given query curve in the same way and then *__finds an approximate nearest neighbour__* of the query inside the dataset by searching the curves that are in the same hash bucket as itself and in all hash tables. The comparisons are done using discrete Frechet distance and the method returns a pair of a pointer to the approximately nearest curve and the discrete Frechet distance from it.<br><br>
   __Notable implementation decisions__:
   * Function for discrete Frechet distance calculation returns the whole table of the dynamic programming approach instead of just the final value.
   * Shifts t are different for each dimension.
   * After snapping curves to a grid, we replace lost points by applying padding so as all vectors have the same length before using LSH to store them in hash tables.<br><br>
   
 * #### TimeSeries-ANN/ContinuousFrechet
-  1. ...
+  1. __cont_Frechet.hpp__ : This header file contains functions that were used to help us use the code in the "ContinuousFrechet/Fred" directory while treating it as a __"black box"__. They (a) convert our objects to objects of the classes that are implemented in the "ContinuousFrechet/Fred" directory and (b) use functions that are implemented in the "ContinuousFrechet/Fred" directory to calculate the Continuous Frechet Distance. Also included in this file is the function search_exactNN() that -given a query curve and a dataset- *__searches for the exact nearest neighbour of the query inside the dataset by using the continuous Frechet distance__*.
+  2. __contF_LSH.hpp__ : This header file contains the LSH class (see comments on code for explanation of each parameter of constructor). Upon creation, an object of this class has everything needed to *__hash and append each curve of a given dataset into multiple hash tables__* via the dataset_hashing() method. Note that the hash tables are filled with Association objects, which are triplets of a *curve*, its *grid curve* (produced by the snap_to_1dgrid() method) and the grid curve as a 1d *vector* (aka a flattened version). The snap_to_1dgrid() method uses random shifts distributed uniformly in [0, δ) to produce different grids (as many as the hash tables) and *__snap the curves__* onto them using the following formula: xi' = floor((x-t)/δ + 1/2)δ + t, yi' = floor((x-t)/δ + 1/2)δ + t, where δ is delta parameter and t is a randomized shift each time. After this procedure, the associations are stored using their vector as key into the 1d tables with the help of LSH for vectors. Finally, the search_ANN() method hashes a given query curve in the same way and then *__finds an approximate nearest neighbour__* of the query inside the dataset by searching the curves that are in the same hash bucket as itself and in all hash tables. The comparisons are done using continuous Frechet distance and the method returns a pair of a pointer to the approximately nearest curve and the continuous Frechet distance from it.
+  3. __Fred/__ : The code contained in this directory was given to us to help us with the calculation of the continuous Frechet distance and was used as a "black box". *Source*: https://github.com/derohde/Fred/
 
 ### TimeSeries-Clustering/
 
@@ -110,96 +113,44 @@ In this section we will analyse our code file-by-file and talk about any possibl
   2. __Clustering_interface.hpp__: This header file contains the class Cluster_params. After construction, an object of this class has all the necessary attributes and methods to implement a fully-fledged command line interface for the Clustering program that includes methods for reading a command, checking if it is valid, finding parameters, confirming that their values are acceptable, storing them and passing default values into possible non-mandatory parameters that were not given. After its construction, all parameters needed for the ANN search algorithm will be stored in its attributes.
 
 ### includes/
-  1. __curves.hpp__: This header file contains a class that is used throughout our code to make it more intuitive. That is the Curve2d class. It helps us create objects that *__simulate curves in the 2-dimensional space__* by having an id and a vector of 2-dimensional points. The 2-dimensional points are constructed by the class just above, named Point2d. This is again a very simple class that is there only to make the rest of our code more intuitive. Finally, the point2d_L2() function calculates the euclidean distance between two of those points.
+  1. __curves.hpp__: This header file contains a class that is used throughout our code to make it more intuitive. That is the Curve2d class. It helps us create objects that *__simulate curves in the 2-dimensional space__* by having an id, a vector of 2-dimensional points and some attributes that help us perform clustering (such as the "cluster" attribute that is the index of the cluster to which said curve is assigned). The 2-dimensional points are constructed by the class just above, named Point2d. This is again a very simple class that is there only to make the rest of our code more intuitive. The point2d_L2() function calculates the euclidean distance between two of those points. Finally, included here is the delta_tuning() function that is responsible for *__calculating the delta parameter__* in case it is not given by the user and the identical_curves() function to *__help us implement a quering trick for LSH__*. For more info about both of these function please refer to the [Optimization experiments and parameter tuning](#optimization-experiments-and-parameter-tuning) section.
   2. __mean_curve.hpp__: This header file contains a function mean_curve() *__to compute the mean curve of two given curves__*. The mean curve is filtered in order to be simplified. The computation of a mean curve requires an *__optimal traversal__* of the given curves, which is computed by the function optimal_traversal() in the same file. Finally, the mean_of_curves() function returns *__the mean curve  of multiple given curves__*. <br><br>
   __Notable implementation decisions__:
   * The algorithm to compute the optimal traversal returns it in reverse (because vectors do not and should not have a way to push an element to the front). We decided not to reverse the returned traversal in order to not add additional computational weight to the program.
-  * εδώ για το mean_of_curves
+  * The mean_of_curves() function computes the needed mean curve by simulating a binary tree. At first, it begins with the last two curves given in the std::vector that is given as parameter and calculates their mean. Then that mean curve is stored in an std::vector and we decrease the index showing our remaining given curves by 2. This procedure repeats until either (a) the "remaining" index reaches 0 -meaning we have calculated half the mean curves of each concecutive pair- or (b) the "remaining" index reaches 1 -meaning the number of curves is odd, so one of them does not have a pair-. In the second case, we push the remaining curve together with the previously computed mean curves. After this initial "loading" of mean curves in the aforementioned std::vector, we repeat the following process until there is only 1 remaining curve:
+    * Push the mean curve of each concecutive pair of curves in the std::vector
+    * Decrease the "remaining" index by 2 so as to not select newly added mean curves at the same iteration during which they were pushed in the std::vector
+    * The pair of curves of which we calculated the mean is removed.<br>
+  At the end of this procedure, the only remaining curve will be the mean curve of all the given curves.
 
-## Final thoughts
+## Optimization experiments and parameter tuning
+
+__Quering trick__ (for Frechet methods): When we find the hash bucket of the query, we check the bucket for the existance of identical grid-curves so as to skip the calculation of the Frechet distance for the non-identical ones. We implemented this trick to speed up the procedure but there was no noticable improvement (at least for our dataset). We believe that maybe this trick can help with the continuous Frechet method but testing and evaluating this enough to get concrete results was hard at the given time. That said, the current implementation of the program runs without the quering trick but there is always the option to use it by setting the parameter "quering_trick"  of the search_ANN() methods to the boolean value "true".
+
+__Padding__ : To be able to use the LSH for vectors method we had to apply padding (meaning to replace any points that were cut) to the grid-curves in order to have all the vectors be of the same length. We chose to use the value 10000 for the padding. If you wish to use another dataset keep in mind that it would be best to replace that value with a value big enough to be outside of the range of values in your dataset.
+
+__Delta tuning__: When not given by the user, this parameter is computed automatically by the program according to the given data so as to approximate the mean distance between two concective vertices in the curves of the dataset. In order to achieve that, the delta_tuning() function (located in curves.hpp) selects random curve pairs, sums the mean distances of their vertices and calculates the average value for all pairs. The number of pairs is chose randomly.
+
+### Best parameters for each algorithm
+After experimenting we concluded that the best parameters for each algorithm are as follows:<br>
+* *Vector LSH* : L=1, k=1, tablesize=datasetsize/2,  w=average L2 distance between dataset curves (as vectors)
+* *Hypercube*: k=1. M=30, probes=1, w=average L2 distance between dataset curves (as vectors)
+* *discrete Frechet LSH* : L=6, delta=avg dist between curve vertices, tablesize=dataset_size/8, threshold=dataset_size/4, querying trick=false
+* *continuous Frechet LSH* : L=1, delta=avg dist between curve vertices, tablesize=dataset_size/4, threshold=dataset_size/4, querying trick=true
 
 
+## Evaluation and final thoughts
 
+### Nearest Neighbour search
+For the nearest neighbour search we used the following metrics to evaluate the performance of our code:
+* Maximum Approximation Factor (MAF)
+* average(distanceApproximate / distanceTrue) (printed in std out)
+* timeApproximateAverage/timeTrueAverage (printed in std out)
 
-Οι δομές μας:
-Για την αναπαράσταση των χρονοσειρών των δεδομένων μας ως διανύσματα χρησιμοποιούμε την κλάση Item (την οποία χρησιμοποιήσαμε και στο Project 1) η οποία χαρακτηρίζεται απο ένα id string και ένα vector απο doubles.
-Για την αναπαράσταση των χρονοσειρών ως πολυγωνικές καμπύλες χρησιμοποιούμε την κλάση Curve2d. Η κλάση αυτή χαρακτηρίζεται μεταξύ άλλων απο ένα id string και έναν vector απο Point2d αντικείμενα. Τα point2d αντικείμενα αναπαριστούν ένα σημείο 2 διαστάσεων.
-Για την τελική αποθήκευση των καμπυλών στα buckets χρησιμοποιούμε αντικείμενα κλάσης Association. Η κλάση αναπαριστά τη συσχέτιση μεταξύ
-α) Της αρχικής καμπύλης
-β) Της καμπύλης πλέγματος (grid curve) που λειτουργεί ώς το κλειδί του locality sensitive hashing
-γ) Του x_vector που αναπαριστά την καμπύλη πλέγματος ως διάνυσμα και λειτουργεί ως κλειδί για το hashing της αποθήκευσης.
-
-Η μέση καμπύλη ν καμπυλών υπολογίζεται χρησιμοποιώντας τη συνάρτηση mean_of_curves που προσομοιώνει έναν αλγόριθμο δυαδικού δέντρου ως εξής:
-Η συνάρτηση παίρνει ως όρισμα ένα vector καμπυλών κλάσης Curve2d
-Στο πρώτο στάδιο, ξεκινώντας απο τις 2 τελευταίες καμπύλες του vector, υπολογίζουμε το vector απο Point2d σημεία που αναπαριστά τη mean των δύο καμπυλών. Η mean του ζευγαριού γίνεται push σε έναν vector και ο δείκτης μειώνεται κατα 2. Αυτό γίνεται επαναληπτικά μέχρι 
-α) είτε ο δείκτης να φτάσει στο 0:
-Άρα έχουμε υπολογίσει τις μέσες καμπύλες κάθε διαδοχικού ζευγαριού.
-β) ο δείκτης να φτάσει στο 1:
-Άρα έχει μείνει μια καμπλύλη που δεν είχε ζευγάρι γιατί το συνολικό πλήθος των καμπυλών ήταν περιττό. Σε αυτήν την περίπτωση η καμπύλη γίνεται push στην δομή με τις mean καμπύλες των ζευγαριών.
-Αφού έχουμε "φορτώσει" τα δεδομένα σε μια δομή διαφορετική της αρχικής η διαδικασία αλλάζει ως εξής:
-1) οι mean καμπύλες των διαδοχικών ζευγαριών των καμπυλών γίνονται push στο τέλος της ίδιας δομής και όχι σε διαφορετική
-2) ο δείκτης μειώνεται κατα 2 ώστε να μην πιάσει τις νεοεισαχθέντες mean καμπύλες στο βήμα/πέρασμα κατα το οποίο μπήκαν στη δομή
-3) το ζευγάρι των καμπυλών του οποίου η mean καμπύλη υπολογίστηκε διαγράφεται απο τη δομη
-Η παραπάνω διαδικασία εφαρμόζεται επαναληπτικά εως ότου μείνει μόνο 1 καμπύλη στη δομή η οποία θα αποτελέι και τη μέση καμπύλη όλων των καμπυλών στις οποίες εφαρμόστηκε ο αλγόριθμος. 
-
-TimeSeries-ANN/ContinuousFrechet/cont_Frechet.hpp
-Αρχείο επικεφαλίδας που περιέχει συναρτήσεις τύπου "black box" που 
-α) μετατρέπουν τα αντικείμενα των κλάσεών μας σε αντικείμενα των κλάσεων που χρησιμοποιούνται στον φάκελο Fred που μας υποδείχθηκε να ενσωματώσουμε χωρίς αλλαγές
-β) χρησιμοποιούν τις συναρτήσεις που υπάρχουν υλοποιημένες στον φάκελο Fred για τον υπολογισμό της Continuous Frechet Distance
-Επίσης στο αρχείο περιέχεται συνάρτησει που βρίσκει με εξαντλητική αναζήτηση την καμπύλη (απο ένα συνόλο καμπυλών) με την μικρότερη Continuous Frechet distance απο μια καμπύλη.
-
-TimeSeries-ANN/ContinuousFrechet/contF_LSH.hpp
-Αρχείο επικεφαλίδας που αφορά το LSH hashing πολυγωνικών καμπυλών στην ευθεία R και την αναζήτηση κοντινότερου γείτον χρησιμοποιώντας τη μετρική Continuous Frechet distance
-
-Evaluation
-Συμπληρωματικά των μετρικών που ζητούνται απο την εκφώνηση για το evaluation των αλγορίθμων χρησιμοποιούμε και δυο δικές μας μετρικές που εκτυπώνονται στο std out
-α) tApproximateAverage / tTrueAverage
-β) average (distanceApproximate / distanceTrue)
-
-Πορίσματα - Παρατηρήσεις - Ανάλυση
-Ai) Κάθε χρονοσειρά αναπαρίσταται ως διάνυσμα - Χρησιμοποιούμε τους αλγορίθμους vector LSH και Hypercube της 1ης εργασίας. 
-
-Οι αλγόριθμοι της 1ης εργασίας όπως αναμένεται δεν είναι ιδανικοί για τα δεδομένα των χρονοσειρών καθώς προορίζονται για πιο "απλά" δεδομένα. Βέβαια δεν είναι τελείως μη αξιποιήσιμοι. Μπορούμε σε λίγο μικρότερο χρόνο σε σχέση με την εξαντλητική αναζήτηση να βρούμε σχετικά εύστοχα αποτελέσματα σε κοντινούς γείτονες.
-
-Aiii) Κάθε χρονοσειρά αναπαρίσταται ως πολυγωνική καμπύλη στην ευθεία R - LSH για Continuous Frechet
-
-Η χρήση των ήδη υλοποιημένων συναρτήσεων που μας δόθηκαν μέσω "black box" συναρτήσεων, σε συνδυασμό με τη φύση της μετρικής καθιστούν τον υπολογισμό της Continuous Frechet πολύ αργό σε σχέση με τη discrete frechet. Ακόμα και με αρκετό φιλτράρισμα των καμπυλών για μείωση της πολυπλοκότητας, ο αλγόριθμος καθυστερεί πολύ λόγω της αργής πράξης του υπολογισμού. Παράλληλα η καθυστέρηση στο brute force καθιστά τον έλεγχο και την αξιολόγηση των αποτελεσμάτων χρονοβόρα υπόθεση. Ωστόσο κάναμε δοκιμές και διαπιστώσαμε ότι απο άποψη ακρίβειας ο αλγόριθμος είναι άριστος και μπορεί να ανταποκριθεί στα δεδομένα των χρονοσειρών.
-
-Aii) Η αναπαράσταση των χρονοσειρών ως πολυγωνικές καμπύλες στον R^2, η χρήση της Discrete Frechet για την αναζήτηση του κοντινότερου γείτονα και ο αντίστοιχος LSH αλγόριθμος.
-
-Αναμφίβολα έδειξαν την καλύτερη επίδοση για τα δεδομένα των χρονοσειρών. Μπορούμε σε πολύ μικρότερο χρόνο σε σχέση με την εξαντλητική αναζήτηση να βρούμε αρκετά εύστοχα και αξιόπιστα αποτελέσματα.
-
-Querying Trick (για Frechet)
-Υλοποιήθηκε σύμφωνα με τις διαφάνειες ώστε τα στοιχεία στο bucket που μας έστειλε το hashing του Query να ελέγχονται πρώτα μια φορά ωστε άν ενα στοιχείο δεν έχει identical grid curve με το στοιχείο της αναζήτησης να μην θεωρείται υποψήφιο ώστς να αποφεύγεται ο υπολογισμός της frechet distance του.
-Ωστόσο δεν διαπιστώσαμε κάποια σημαντική βελτίωση, τουλάχιστον για τα δεδομένα μας, ειδικά στη discrete frechet περίπτωση όπου ο υπολογισμός της είναι αρκετά γρήγορος. Άρα εκεί την έχουμε απενεργοποιημένη ως default. Εκτιμούμε ότι στην continuous frechet περίπτωση μπορεί να έχει σημαντικό αντίκτυπο αλλά η δοκιμή και το evaluation ήταν δύσκολο ώστε να έχουμε concrete συμπέρασμα.
-
-Delta Tuning
-Η παράμετρος delta όταν δεν δίνεται απο τον χρήστη αυτορυθμίζεται με βάση τα δεδομένα ωστε να προσεγγίζει τη μέση απόσταση μεταξύ των διαδοχικών κορυφών των καμπυλών του input dataset. Η συνάρτηση για ένα αριθμό επαναλήψεων επιλέγει τυχαία ζευγάρια καμπυλών και αθροίζει τη μέση απόσταση των κορυφών και βρίσκει τη μέση τιμή της για όλα τα ζευγάρια. Η υλοποίηση βρίσκεται στο αρχείο curves.hpp
-
-Padding
-Προσθέτουμε συντεταγμένες με τιμή 10.000 (ένας μεγάλος αριθμός πολύ εκτός του πεδίου τιμών) σε έναν x_vector μέχρι να φτάσει μήκος ίσο της αρχικής καμπύλης στην ευθέια R ή διπλάσσιο της αρχικής 2d καμπύλης. Έτσι όλα τα x_vectors έχουν ίδιο μήκος ώστε να δουλέυει το LSH της 1ης εργασίας για αποθληκευση στα buckets.
-
-Parameter Tuning (best parameters for each algorithm)
-
-Vector_LSH L=1, k=1, tablesize=datasetsize/2 w = average L2 distance between dataset curves (as vectors)
-
-Hypercube k=1. M=30, probes=1, w = average L2 distance between dataset curves (as vectors)
-
-discrete_LSH L = 6, delta = avg dist between curve vertices, 
-tablesize = dataset_size/8, threshold = dataset_size/4, querying trick = false
-
-continuous_LSH L = 1, delta = avg dist between curve vertices, 
-tablesize = dataset_size/4, threshold = dataset_size/4, querying trick = true
-
-Ενδεικτικές Εκτελέσεις **************δε μου τρεχουν ετσι***************
-$./bin/search –i datasets/nasd_input.csv –q datasets/nasd_query.csv –k 1 -L 1 -ο outputs/output.txt -algorithm LSH
-
-$./bin/search –i datasets/nasd_input.csv –q datasets/nasd_query.csv –k 1 -M 30 -probes 1 -ο outputs/output.txt -algorithm Hypercube
-
-$./bin/search –i datasets/nasd_input.csv –q datasets/nasd_query.csv -L 6 -ο outputs/output.txt -algorithm Frechet -metric discrete
-
-$./bin/search –i datasets/nasd_input.csv –q datasets/nasd_query.csv -ο outputs/output.txt -algorithm Frechet -metric continuous
-
+Performance tests per method:<br>
+* __LSH/Hypercube for vectors__ : As expected, these methods did not perform as good as they did in our previous project. While they are not unusable (they finish slightly faster than the brute force method without being too far off), it is pretty clear that the complexity of the curves requires a different approach in order to have satisfying results.
+* __LSH for curves with discrete Frechet__ : Definitely an upgrade compare to the previous method and possibly the best overall. This method performs a lot faster than the brute force method and reliably returns great approximations.
+*__LSH for curves with continuous Frechet__ : While incredibly accurate, this method is extremely slow. Its low speed maybe caused by the complexity of the metric, as well as the fact that the code is used as a black box. Even after a lot of filtering to reduce the dimensionality of the curves, the algorithm remains pretty slow.
 
 
 
