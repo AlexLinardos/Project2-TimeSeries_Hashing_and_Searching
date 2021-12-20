@@ -105,8 +105,13 @@ In this section we will analyse our code file-by-file and talk about any possibl
   3. __Fred/__ : The code contained in this directory was given to us to help us with the calculation of the continuous Frechet distance and was used as a "black box". *Source*: https://github.com/derohde/Fred/
 
 ### TimeSeries-Clustering/
+  1. __initialization.hpp__ : This header file contains two Initializer classes. One for vectors and one for curves. Each class contains the public initialize_pp() method that performs the *__k-means++ initialization process to initialize the centroids of a given number of clusters__*. For that, it uses the methods in the private section to help with the calculations of the distances from nearest centroids and the probability of each point to be chosen as next centroid.
+  2. __assignment.hpp__ : This header file contains two Assignor classes. One for vectors and one for curves. Each class contains various methods to *__implement the assignment step of the clustering process__* which assigns each point of the dataset to a cluster. Both classes contain the classic (aka Lloyd's) method. The VectorAssignor also contains the assignment by LSH Range Search and by Hypercube Range Search methods (with L2 distance), while the CurveAssignor contains the assignment by discrete Frechet LSH Range Search method.
+  3. __update.hpp__ : This header file contains two functions that *__implement the update step of the clustering process__* which updates the position of the centroids. One of them is for vectors and the other is for curves (as is obvious by their names).
+
 
 ### src/
+  1. __search_main.cpp__ : Main code file that executes the nearest neighbour searching process according to the command line parameters given by the user. It checks the value of the -algorithm parameter and executes the respective algorithm. If the algorithm is set to "Frechet" it also check the -metric parameter and executes accordingly. At the end, it produces the output file with the results of the run and also prints evaluation metrics on std out.
 
 ### ui/
   1. __NN_interface.hpp__: This header file contains the class NN_params. After construction, an object of this class has all the necessary attributes and methods to implement a fully-fledged command line interface for the ANN search program that includes methods for reading a command, checking if it is valid, finding parameters, confirming that their values are acceptable, storing them and passing default values into possible non-mandatory parameters that were not given. After its construction, all parameters needed for the ANN search algorithm will be stored in its attributes.
