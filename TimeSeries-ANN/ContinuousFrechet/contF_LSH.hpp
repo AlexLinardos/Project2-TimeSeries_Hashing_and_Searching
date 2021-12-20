@@ -15,7 +15,7 @@
 namespace cF
 {
     // minima maxima y removing from π˜ = v1, . . . , v` any vi s.t. vi ∈ [min{vi−1, vi+1}, max{vi−1, vi+1}]
-    // στο min/max αφαιρεις ενα στοιχειο αν ειναι μεγαλυτερο απο το προηγουμενο του και μικροτερο απο το επομενο του ή αν ειναι ισο με ενα απο τα 2
+    // στο min/max αφαιρoύμε ενα στοιχειο αν ειναι μεγαλυτερο απο το προηγουμενο του και μικροτερο απο το επομενο του ή αν ειναι ισο με ενα απο τα 2
     void minima_maxima(vector<double> &p)
     {
         int og_size = p.size();
@@ -53,39 +53,38 @@ namespace cF
         return;
     }
 
-    curves::Curve2d *filter_curve(curves::Curve2d &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
+    void filter_curve(curves::Curve2d &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
     {
-        curves::Curve2d *filtered_curve = new curves::Curve2d(curve.id);
-        filtered_curve->data = curve.data;
-        int i = 0;
-        int cuts = 0;
-        int total_cuts = 0;
-        while (i + 2 < filtered_curve->data.size())
+        int og_size = curve.data.size();
+        int i=0;
+        int cuts=0;
+        int total_cuts=0;
+        while(i+2 < curve.data.size())
         {
-            cuts = 0;
-            if ((point2d_L2(filtered_curve->data[i], filtered_curve->data[i + 1]) <= e) && (point2d_L2(filtered_curve->data[i + 1], filtered_curve->data[i + 2]) <= e))
+            cuts=0;
+            if((point2d_L2(curve.data[i], curve.data[i+1]) <= e) && (point2d_L2(curve.data[i+1], curve.data[i+2]) <= e))
             {
-                (filtered_curve->data).erase(filtered_curve->data.begin() + i + 1); // erase element i+1
+                curve.data.erase(curve.data.begin()+i+1); // erase element i+1
                 cuts++;
                 total_cuts++;
             }
-            if (cuts == 0)
+            if(cuts==0)
                 i++;
         }
-        while (cuts != 0)
+        while(cuts!=0)
         {
-            cuts = 0;
+            cuts=0;
             i--;
-            if ((point2d_L2(filtered_curve->data[i], filtered_curve->data[i + 1]) <= e) && (point2d_L2(filtered_curve->data[i + 1], filtered_curve->data[i + 2]) <= e))
+            if((point2d_L2(curve.data[i], curve.data[i+1]) <= e) && (point2d_L2(curve.data[i+1], curve.data[i+2]) <= e))
             {
-                (filtered_curve->data).erase(filtered_curve->data.begin() + i + 1); // erase element i+1
+                curve.data.erase(curve.data.begin()+i+1); // erase element i+1
                 cuts++;
                 total_cuts++;
             }
         }
 
-        cout << "filtering cut " << total_cuts << " points out of " << curve.data.size() << endl;
-        return filtered_curve;
+        cout << "filtering cut " << total_cuts << " points out of "<< og_size << endl;
+        return;
     }
 
     void filter_curve(vector<curves::Point2d> &curve, double e) // for any consecutive points a, b, c, if |a − b| ≤ ε and |b − c| ≤ ε then remove b
@@ -122,15 +121,13 @@ namespace cF
         return;
     }
 
-    vector<curves::Curve2d> *filter_curves(vector<curves::Curve2d> &curve_dataset, double e)
+    void filter_curves(vector<curves::Curve2d> &curve_dataset, double e)
     {
-        vector<curves::Curve2d> *filtered_curve_dataset = new vector<curves::Curve2d>;
         for (int i = 0; i < curve_dataset.size(); i++)
         {
             cout << "curve#" << i << ": ";
-            filtered_curve_dataset->push_back(*filter_curve(curve_dataset[i], e));
+            filter_curve(curve_dataset[i], e);
         }
-        return filtered_curve_dataset;
     }
 }
 
@@ -196,7 +193,7 @@ namespace cFLSH
 
             this->g_family = new G(4, this->tableSize, distance, (*this->dataset)[0].data.size() * 2); // will be used for storing in 1d table
             
-            // Initialize L hashTables, Grids(shifted_deltas)
+            // Initialize L hashTables, Grids (each t (combined with the delta parameter) represents a grid)
             hashTables = new std::vector<Association> *[L];
             t = new double[L];
             for (int i = 0; i < L; i++) // for every hashTable

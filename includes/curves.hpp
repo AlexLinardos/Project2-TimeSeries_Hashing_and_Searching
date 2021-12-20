@@ -10,7 +10,7 @@
 
 namespace curves
 {
-    class Point2d
+    class Point2d // 2-dimensional point representation
     {
     public:
         double x;
@@ -19,7 +19,7 @@ namespace curves
         Point2d(double x, double y) : x(x), y(y){};
     };
 
-    class Curve2d
+    class Curve2d // curve of 2-dimensional points
     {
     public:
         std::string id;
@@ -35,13 +35,7 @@ namespace curves
 
         Curve2d(std::string id) : id(id) {}
 
-        Curve2d(std::string id, std::vector<Point2d> &p_data) : id(id)
-        {
-            for (int i = 0; i < p_data.size(); i++)
-            {
-                this->data.push_back(p_data[i]);
-            }
-        }
+        Curve2d(std::string id, std::vector<Point2d> &p_data) : id(id), data(p_data) {}
 
         Curve2d(std::string id, std::vector<double> vector1, std::vector<double> vector2) : id(id)
         {
@@ -62,7 +56,7 @@ namespace curves
     };
 }
 
-double point2d_L2(curves::Point2d &point1, curves::Point2d &point2)
+double point2d_L2(curves::Point2d &point1, curves::Point2d &point2) // measures L2 distance of 2 Point2d points
 {
     double dist = pow((point1.x - point2.x), 2) + pow((point1.y - point2.y), 2);
     return sqrt(dist);
@@ -106,7 +100,7 @@ double delta_tuning(std::vector<curves::Curve2d> &curves) // calculates the aver
     return avg;
 }
 
-bool identical_curves(vector<curves::Point2d> &curve1, vector<curves::Point2d> &curve2)
+bool identical_curves(vector<curves::Point2d> &curve1, vector<curves::Point2d> &curve2) // returns true, if 2 curves are identical (used to check grid curves as a querying trick)
 {
     // int curve_size = curve1.data.size();
 
@@ -121,7 +115,7 @@ bool identical_curves(vector<curves::Point2d> &curve1, vector<curves::Point2d> &
     return true;
 }
 
-bool identical_curves(vector<double> &curve1, vector<double> &curve2)
+bool identical_curves(vector<double> &curve1, vector<double> &curve2) // returns true, if 2 double vectors are identical (used to check grid curves as a querying trick)
 {
     // int curve_size = curve1.size();
 

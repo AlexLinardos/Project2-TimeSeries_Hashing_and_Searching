@@ -204,9 +204,7 @@ int main(int argc, char *argv[])
         std::cout << "------[" << params.metric << " Frechet]------" << std::endl;
 
         vector<curves::Curve2d> *curves_dataset = new vector<curves::Curve2d>;
-        vector<curves::Curve2d> *filtered_curves_dataset = new vector<curves::Curve2d>;
         vector<curves::Curve2d> *curves_queryset = new vector<curves::Curve2d>;
-        vector<curves::Curve2d> *filtered_curves_queryset = new vector<curves::Curve2d>;
 
         // create a vector that will help us represent time
         vector<double> t_dimension;
@@ -294,11 +292,11 @@ int main(int argc, char *argv[])
         }
         else if (lc(params.metric) == "continuous")
         {
-            filtered_curves_dataset = cF::filter_curves(*curves_dataset, 2*params.delta);
-            filtered_curves_queryset = cF::filter_curves(*curves_queryset, 2*params.delta);
+            cF::filter_curves(*curves_dataset, 2*params.delta);
+            cF::filter_curves(*curves_queryset, 2*params.delta);
 
             // perform LSH for continuous Frechet
-            cFLSH::LSH *cLSH = new cFLSH::LSH(filtered_curves_dataset, 1, params.delta, 8);
+            cFLSH::LSH *cLSH = new cFLSH::LSH(curves_dataset, 1, params.delta, 2);
 
             std::cout << "Searching for the approximate nearest neighbors of the query curves..." << std::endl;
             ofstream output_file;
@@ -306,18 +304,18 @@ int main(int argc, char *argv[])
 
             output_file << "Algorithm: LSH_Frechet_Continuous" << endl
                         << endl;
-            for (int i = 0; i < filtered_curves_queryset->size(); i++)
+            for (int i = 0; i < curves_queryset->size(); i++)
             {
                 output_file << "Query: " << (*curves_queryset)[i].id << endl;
 
                 // cout << "[ANN]" << endl;
                 lsh_begin = std::chrono::steady_clock::now();
-                std::pair<curves::Curve2d *, double> ann = cLSH->search_ANN((*filtered_curves_queryset)[i], true);
+                std::pair<curves::Curve2d *, double> ann = cLSH->search_ANN((*curves_queryset)[i], true, curves_dataset->size() / 4);
                 lsh_elapsed += (double)(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - lsh_begin).count() / 1000000.0);
 
                 // cout << "[Brute Force]" << endl;
                 true_begin = std::chrono::steady_clock::now();
-                std::pair<curves::Curve2d *, double> true_nn = cF::search_exactNN((*filtered_curves_queryset)[i], *filtered_curves_dataset);
+                std::pair<curves::Curve2d *, double> true_nn = cF::search_exactNN((*curves_queryset)[i], *curves_dataset);
                 brute_elapsed += (double)(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - true_begin).count() / 1000000.0);
 
                 int neighboors_returned = 0;
@@ -355,8 +353,6 @@ int main(int argc, char *argv[])
             delete cLSH;
         }
 
-        delete filtered_curves_queryset;
-        delete filtered_curves_dataset;
         delete curves_dataset;
         delete curves_queryset;
     }

@@ -10,33 +10,13 @@
 
 namespace cF
 {
-    // Curve vecToCurve(Item &item)
-    // {
-    //     Points points(2);
-    //     for (int i = 0; i < item.xij.size(); i++)
-    //     {
-    //         // Coordinates coordinates;
-    //         // coordinates.push_back((coordinate_t)item.xij[i]);
-    //         // coordinates.push_back((coordinate_t)i);
-    //         Point point(2);
-    //         point.set(0, (coordinate_t)item.xij[i]);
-    //         point.set(1, (coordinate_t)i);
-    //         points.add(point);
-    //     }
-
-    //     // Curve * curve = new Curve(points, item.id);
-    //     Curve curve(points, item.id);
-    //     return curve;
-    // }
-
-    Curve fredCurve(curves::Curve2d &curve)
-    {
+    Curve fredCurve(curves::Curve2d &curve) 
+    { // converts a Curve2d object (our class) to a Curve object used in Fred folder from github to calculate continuous frechet
         Points points(1);
         for (int i = 0; i < curve.data.size(); i++)
         {
             Point point(1);
             point.set(0, (coordinate_t)curve.data[i].x);
-            // point.set(1, (coordinate_t)curve.data[i].y);
 
             Point point2(1);
             point2.set(0, (coordinate_t)curve.data[i].y);
@@ -45,24 +25,18 @@ namespace cF
             points.add(point2);
         }
 
-        // Curve * fred_curve = new Curve(points, item.id);
         Curve fred_curve(points, curve.id);
         return fred_curve;
     }
 
-    // double distance(Item &item1,  Item &item2)
-    // {
-    //     return Frechet::Continuous::distance(vecToCurve(item1), vecToCurve(item2)).value;
-    // }
-
     double c_distance(curves::Curve2d &item1, curves::Curve2d &item2)
-    {
+    { // "black box" function that converts our structures to Fred folder's structures to compute continuous frechet distance
         return Frechet::Continuous::distance(fredCurve(item1), fredCurve(item2)).value;
     }
 
-    // searches for the exact nearest neighbour of the query curve using brute force approach
+    
     std::pair<curves::Curve2d *, double> search_exactNN(curves::Curve2d &query, vector<curves::Curve2d> &dataset)
-    {
+    { // searches for the exact nearest neighbour of the query curve using brute force approach
         int size = query.data.size(); // length of curve
 
         // we will store current nearest neighbour in curr_NN along with its distance from query
