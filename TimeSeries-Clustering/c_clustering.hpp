@@ -21,15 +21,8 @@ namespace curve_cluster
         int n_centers;                         // number of centers to be initialized
         std::vector<curves::Curve2d> *dataset; // a dataset of curves
 
-<<<<<<< HEAD
         std::vector<int> assignments_vec;     // shows the cluster to which each curve is assigned to
                                               // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
-=======
-        vector<vector<curves::Point2d>> centers;
-        vector<vector<curves::Curve2d>> clusters;
-        std::vector<int> assignments_vec; // shows the cluster to which each curve is assigned to
-                                          // (example: if assignments[4]=2 then curve at index 4 of dataset is assigned to cluster at index 2)
->>>>>>> b9f060b5448162ff1012a7d4b50b0b0c557c2bae
 
         double mean_df;
 
@@ -106,7 +99,6 @@ namespace curve_cluster
             return min_dist / 2;
         }
 
-<<<<<<< HEAD
         public:
 
         vector<vector<curves::Point2d>> centers;
@@ -120,17 +112,6 @@ namespace curve_cluster
                                                                                 mean_df(dF::mean_df_between_curves(*dataset)),
                                                                                 eng(chrono::system_clock::now().time_since_epoch().count()),
                                                                                 uid(0, dataset->size() - 1) {}
-=======
-    public:
-        Clustering(Cli::Cluster_params &params, std::vector<curves::Curve2d> *dataset) : params(params),
-                                                                                         n_centers(params.clusters),
-                                                                                         clusters(params.clusters),
-                                                                                         assignments_vec(dataset->size()),
-                                                                                         dataset(dataset),
-                                                                                         mean_df(dF::mean_df_between_curves(*dataset)),
-                                                                                         eng(chrono::system_clock::now().time_since_epoch().count()),
-                                                                                         uid(0, dataset->size() - 1) {}
->>>>>>> b9f060b5448162ff1012a7d4b50b0b0c557c2bae
 
         void initialize_pp()
         {
