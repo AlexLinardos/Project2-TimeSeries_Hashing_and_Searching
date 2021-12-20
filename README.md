@@ -33,7 +33,8 @@ Github repository: https://github.com/AlexLinardos/Project2-TimeSeries_Hashing_a
 ## Compilation and execution instructions
 ### Compilation options
 * To compile the code for ANN search: `make search`
-* To compile the code for Clustering: `make cluster` 
+* To compile the code for Clustering: `make cluster`
+* To compile everything: `make` 
 <br>To delete all the files in both the "bin" and the "outputs" directories use `make clean`
 <br>To delete all the files in the "bin" directory use `make clean_bin`
 

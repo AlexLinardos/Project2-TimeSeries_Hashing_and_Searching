@@ -21,7 +21,7 @@ namespace updt
             // calculate mean
             for (int j = 0; j < T; ++j)
             {
-                mean = vector_mean(mean, clusters[i][j].xij, v_dimension, T); // using vector_addition from utilities.hpp
+                mean = vector_mean(mean, clusters[i][j].xij, v_dimension, T);
             }
 
             centers[i].xij = mean;
@@ -34,7 +34,16 @@ namespace updt
         // we must calculate mean per cluster and make it the new center
         for (int i = 0; i < centers.size(); ++i)
         {
-            // CODE HERE
+            vector<double> mean(v_dimension, 0.0);
+            int T = clusters[i].size(); // number of objects in cluster
+
+            // calculate mean
+            for (int j = 0; j < T; ++j)
+            {
+                mean = vector_mean(mean, clusters[i][j].xij, v_dimension, T);
+            }
+
+            centers[i].xij = mean;
         }
     }
 }

@@ -210,8 +210,8 @@ namespace Cli
         {
             if (argc == 1) // only for testing purposes
             {
-                this->input_f = "../datasets/nasd_input.csv";
-                this->conf_f = "../cluster.conf";
+                this->input_f = "datasets/nasd_input.csv";
+                this->conf_f = "cluster.conf";
                 this->output_f = "output.txt";
                 this->update = "Mean vector"; // Mean Frechet - Mean Vector
                 this->assignment = "Classic"; // Classic - LSH - Hypercube - LSH_Frechet
